@@ -27,6 +27,7 @@ import org.apache.spark.streaming.kafka010.LocationStrategies.PreferConsistent
   */
 object pv_uv_hbase {
   def main(args: Array[String]): Unit = {
+    val batch = 10
     val sparkConf: SparkConf = new SparkConf()
       .setAppName("pv_uv")
       .set("spark.streaming.kafka.consumer.cache.enabled", "false")
@@ -34,9 +35,9 @@ object pv_uv_hbase {
       .setIfMissing("spark.master", "local[*]")
       .set("spark.streaming.kafka.maxRatePerPartition", "20000")
 
-    val ssc = new StreamingContext(sparkConf, Seconds(60))
-    ssc.sparkContext.setCheckpointDir("hdfs://psy831:9000//checkpoint")
+    val ssc = new StreamingContext(sparkConf, Seconds(batch))
     System.setProperty("HADOOP_USER_NAME", "psy831")
+    ssc.checkpoint("hdfs://psy831:9000//checkpoint")
 
     //定义kafka参数
     val bootstrap: String = "psy831:9092,psy832:9092,psy833:9092"
@@ -69,6 +70,11 @@ object pv_uv_hbase {
     val viewDS: DStream[ViewTable] = ParseObject.parseView(recordDs)
     val clickDS: DStream[ClickTable] = ParseObject.parseClick(recordDs)
 
+    //计算view和click的PV
+    val viewPv: DStream[Long] = viewDS
+      .countByWindow(Seconds(batch * 6), Seconds(batch * 6))
+    val clickPv: DStream[Long] = clickDS
+      .countByWindow(Seconds(batch * 6), Seconds(batch * 6))
 
     //HBase 配置
     val tableName = "dgmall_headline_test"
