@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+<property>
+    <name>javax.jdo.option.ConnectionURL</name>
+    <value>jdbc:mysql://psy831:3306/hive?createDatabaseIfNotExist
+        =true</value>
+</property>
+
+<property>
+    <name>javax.jdo.option.ConnectionDriverName</name>
+    <value>com.mysql.jdbc.Driver</value>
+</property>
+
+<property>
+    <name>javax.jdo.option.ConnectionUserName</name>
+    <value>root</value>
+</property>
+
+<property>
+    <name>javax.jdo.option.ConnectionPassword</name>
+    <value>root</value>
+</property>
+
+<property>
+    <name>hive.metastore.warehouse.dir</name>
+    <value>/user/hive/warehouse</value>
+</property>
+
+<!-- hive查询时输出列名 -->
+<property>
+    <name>hive.cli.print.header</name>
+    <value>true</value>
+</property>
+
+<!-- 显示当前数据库名 -->
+<property>
+    <name>hive.cli.print.current.db</name>
+    <value>true</value>
+</property>
+
+<property>
+   <name>datanucleus.autoStartMechanism</name>
+   <value>SchemaTable</value>
+</property>
+
+<property>
+   <name>hive.metastore.schema.verification</name>
+   <value>false</value>
+</property>
+
+<property>
+    <name>system:java.io.tmpdir</name>
+    <value>/home/dev/apps/hivedata/tmp</value>
+</property>
+<property>
+    <name>system:user.name</name>
+    <value>dev</value>
+</property>
+
+    <property>
+        <name>hive.exec.dynamic.partition</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>hive.exec.dynamic.partition.mode</name>
+        <value>nonstrict</value>
+    </property>
+
+    <property>
+        <name>hive.jobname.length</name>
+        <value>20</value>
+    </property>
+
+    <property>
+        <name>hive.exec.parallel</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>hive.map.aggr</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>hive.groupby.skewindata</name>
+        <value>true</value>
+    </property>
+
+
+</configuration>
+

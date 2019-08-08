@@ -6,7 +6,7 @@ package com.dgmall.sparktest.dgmallTestV2.caseclass
   */
 case class VideoInfoTable(
                            user_id:String,
-                           user_id:String,
+                           video_id:String,
                            upload_time:String,
                            video_desc:String,
                            video_tag:String,
