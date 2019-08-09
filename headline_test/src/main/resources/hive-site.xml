@@ -88,6 +88,10 @@
         <value>true</value>
     </property>
 
+    <property>
+        <name>datanucleus.autoStartMechanismMode</name>
+        <value>Ignored</value>
+    </property>
 
 </configuration>
 
