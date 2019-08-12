@@ -9,7 +9,7 @@ import org.apache.spark.sql.SparkSession
 object DwsInsertDataDay {
   def main(args: Array[String]): Unit = {
     val spark: SparkSession = SparkSession.builder()
-      .appName("Headline_demo")
+      .appName("DwsInsertDataDay")
       .master("local[*]")
       .enableHiveSupport()
       .getOrCreate()
@@ -22,7 +22,7 @@ object DwsInsertDataDay {
     sql("use headline_test")
 
     val month = "2019-08"
-    val day = "2019-08-09"
+    val day = "2019-08-07"
 
 
     val spe = "$."
@@ -30,9 +30,11 @@ object DwsInsertDataDay {
     import com.dgmall.sparktest.dgmallTestV2.common.HeadlineSqls._
 
     //视频信息汇总
-//        sql(load_VIDEO_SUMMARY_DAY_LOG(month,day)).show()
+    sql(load_VIDEO_SUMMARY_DAY_LOG(month, day)).show()
     //用户行为汇总
-        sql(load_USER_SUMMARY_DAY_LOG(month,day)).show()
+    sql(load_USER_SUMMARY_DAY_LOG(month, day)).show()
+    //应用层视频信息汇总（天、周、月）
+    sql(load_APP_VIDEO_SUMMARY(month, day)).show()
 
     spark.close()
   }

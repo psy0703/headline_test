@@ -9,7 +9,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 object DwdInsertDataHour {
   def main(args: Array[String]): Unit = {
     val spark: SparkSession = SparkSession.builder()
-      .appName("Headline_demo")
+      .appName("DwdInsertDataHour")
       .master("local[*]")
       .enableHiveSupport()
       .getOrCreate()

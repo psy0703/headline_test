@@ -58,41 +58,41 @@ object HeadlineSqls {
     */
   def load_DWD_WATCH_LOG(day:String,hour:String):String={
     val DWD_WATCH_LOG = s"""
-                                 |insert overwrite table dwd_headline_watch
-                                 |PARTITION (day='$day',hour='$hour')
-                                 |select
-                                 |get_json_object(line, '${spe}distinct_id'),
-                                 |get_json_object(line, '${spe}time'),
-                                 |get_json_object(line, '${spe}Event'),
-                                 |get_json_object(line, '${spe}Type'),
-                                 |get_json_object(line, '${spe}Properties.trace_id'),
-                                 |split(get_json_object(line, '${spe}Properties.trace_id'),'.')[0],
-                                 |split(get_json_object(line, '${spe}Properties.trace_id'),'.')[1],
-                                 |split(get_json_object(line, '${spe}Properties.trace_id'),'.')[2],
-                                 |get_json_object(line, '${spe}Properties.order'),
-                                 |get_json_object(line, '${spe}Properties.user_id'),
-                                 |get_json_object(line, '${spe}Properties.video_id'),
-                                 |get_json_object(line, '${spe}Properties.video_user_id'),
-                                 |get_json_object(line, '${spe}Properties.watch_time_long'),
-                                 |get_json_object(line, '${spe}Properties.is_attention'),
-                                 |get_json_object(line, '${spe}Properties.is_like'),
-                                 |get_json_object(line, '${spe}Properties.is_comment'),
-                                 |get_json_object(line, '${spe}Properties.is_share_weixin'),
-                                 |get_json_object(line, '${spe}Properties.is_share_friendster'),
-                                 |get_json_object(line, '${spe}Properties.is_share_qq'),
-                                 |get_json_object(line, '${spe}Properties.is_save'),
-                                 |get_json_object(line, '${spe}Properties.is_get_red_packets'),
-                                 |get_json_object(line, '${spe}Properties.red_packets_sum'),
-                                 |get_json_object(line, '${spe}Properties.is_copy_site'),
-                                 |get_json_object(line, '${spe}Properties.is_report'),
-                                 |get_json_object(line, '${spe}Properties.report_content'),
-                                 |get_json_object(line, '${spe}Properties.is_not_interested'),
-                                 |get_json_object(line, '${spe}Properties.is_go_shop'),
-                                 |get_json_object(line, '${spe}Properties.shop_id'),
-                                 |get_json_object(line, '${spe}Properties.shop_name')
-                                 |from tmp_headline_log
-                                 |where day='$day'and hour='$hour'
-                                 |and log_type = 'watch_video'
+         |insert overwrite table dwd_headline_watch
+         |PARTITION (day='$day',hour='$hour')
+         |select
+         |get_json_object(line, '${spe}distinct_id'),
+         |get_json_object(line, '${spe}time'),
+         |get_json_object(line, '${spe}Event'),
+         |get_json_object(line, '${spe}Type'),
+         |get_json_object(line, '${spe}Properties.trace_id'),
+         |split(get_json_object(line, '${spe}Properties.trace_id'),'.')[0],
+         |split(get_json_object(line, '${spe}Properties.trace_id'),'.')[1],
+         |split(get_json_object(line, '${spe}Properties.trace_id'),'.')[2],
+         |get_json_object(line, '${spe}Properties.order'),
+         |get_json_object(line, '${spe}Properties.user_id'),
+         |get_json_object(line, '${spe}Properties.video_id'),
+         |get_json_object(line, '${spe}Properties.video_user_id'),
+         |get_json_object(line, '${spe}Properties.watch_time_long'),
+         |get_json_object(line, '${spe}Properties.is_attention'),
+         |get_json_object(line, '${spe}Properties.is_like'),
+         |get_json_object(line, '${spe}Properties.is_comment'),
+         |get_json_object(line, '${spe}Properties.is_share_weixin'),
+         |get_json_object(line, '${spe}Properties.is_share_friendster'),
+         |get_json_object(line, '${spe}Properties.is_share_qq'),
+         |get_json_object(line, '${spe}Properties.is_save'),
+         |get_json_object(line, '${spe}Properties.is_get_red_packets'),
+         |get_json_object(line, '${spe}Properties.red_packets_sum'),
+         |get_json_object(line, '${spe}Properties.is_copy_site'),
+         |get_json_object(line, '${spe}Properties.is_report'),
+         |get_json_object(line, '${spe}Properties.report_content'),
+         |get_json_object(line, '${spe}Properties.is_not_interested'),
+         |get_json_object(line, '${spe}Properties.is_go_shop'),
+         |get_json_object(line, '${spe}Properties.shop_id'),
+         |get_json_object(line, '${spe}Properties.shop_name')
+         |from tmp_headline_log
+         |where day='$day'and hour='$hour'
+         |and log_type = 'watch_video'
       """.stripMargin
     return DWD_WATCH_LOG
   }
@@ -427,6 +427,223 @@ object HeadlineSqls {
       """.stripMargin
 
     return USER_SUMMARY_DAY_LOG
+  }
+
+  def load_APP_VIDEO_SUMMARY(month:String,day:String):String={
+    val APP_VIDEO_SUMMAY =
+      s"""
+        |with
+        |T1day as
+        |(
+        |    SELECT
+        |    video_id,
+        |    view_times as view_times0,
+        |    click_times as click_times0,
+        |    view_uv_count as view_uv_count0,
+        |    click_uv_count as click_uv_count0,
+        |    play_time_count as play_time_count0,
+        |    play_times as play_times0
+        |    FROM
+        |    dws_video_summary_d
+        |    where day = '${day}'
+        |    ),
+        |T1week as
+        |(
+        |    SELECT
+        |    video_id,
+        |    sum(view_times) as view_times1,
+        |    sum(click_times) as click_times1,
+        |    sum(view_uv_count) as view_uv_count1,
+        |    sum(click_uv_count) as click_uv_count1,
+        |    SUM(play_time_count) as play_time_count1,
+        |    SUM(play_times) as play_times1
+        |    FROM
+        |    dws_video_summary_d
+        |    where day  BETWEEN date_sub('${day}',7) AND date_sub('${day}',1)
+        |    group by video_id
+        |    ),
+        |T2week as
+        |(
+        |    SELECT
+        |    video_id,
+        |    sum(view_times) as view_times2,
+        |    sum(click_times) as click_times2,
+        |    sum(view_uv_count) as view_uv_count2,
+        |    sum(click_uv_count) as click_uv_count2,
+        |    SUM(play_time_count) as play_time_count2,
+        |    SUM(play_times) as play_times2
+        |    FROM
+        |    dws_video_summary_d
+        |    where day  BETWEEN date_sub('${day}',14) AND date_sub('${day}',1)
+        |    group by video_id
+        |    ),
+        |T1month as
+        |(
+        |    SELECT
+        |    video_id,
+        |    sum(view_times) as view_times3,
+        |    sum(click_times) as click_times3,
+        |    sum(view_uv_count) as view_uv_count3,
+        |    sum(click_uv_count) as click_uv_count3,
+        |    SUM(play_time_count) as play_time_count3,
+        |    SUM(play_times) as play_times3
+        |    FROM
+        |    dws_video_summary_d
+        |    where day  BETWEEN date_sub('${day}',30) AND date_sub('${day}',1)
+        |    group by video_id
+        |    )
+        |
+        |NSERT OVERWRITE TABLE app_video_summary
+        |PARTITION (month = '${month}' , day = '${day}')
+        |select
+        |    video_id,
+        |    NVL(round(sum(view_times0)/sum(click_times0), 3),0) as ctr_1day,
+        |    NVL(round(sum(view_uv_count0)/sum(click_uv_count0), 3),0) as uv_ctr_1day,
+        |    NVL(sum(play_time_count0),0) as play_long_1day,
+        |    NVL(sum(play_times0),0) as play_times_1day,
+        |    NVL(round(sum(view_times1)/sum(click_times1), 3),0) as ctr_1week,
+        |    NVL(round(sum(view_uv_count1)/sum(click_uv_count1), 3),0) as uv_ctr_1week,
+        |    NVL(SUM(play_time_count1),0) as play_long_1week,
+        |    NVL(SUM(play_times1),0) as play_times_1week,
+        |    NVL(round(sum(view_times2)/sum(click_times2), 3),0) ctr_2week,
+        |    NVL(round(sum(view_uv_count2)/sum(click_uv_count2), 3),0) as uv_ctr_2week,
+        |    NVL(SUM(play_time_count2),0) as play_long_2week,
+        |    NVL(SUM(play_times2),0) as play_times_2week,
+        |    NVL(round(sum(view_times3)/sum(click_times3), 3),0) as ctr_1month,
+        |    NVL(round(sum(view_uv_count3)/sum(click_uv_count3), 3),0) as uv_ctr_1month,
+        |    NVL(SUM(play_time_count3),0) as play_long_1month,
+        |    NVL(SUM(play_times3),0) as play_times_1month
+        |FROM
+        |(
+        |select
+        |    video_id,
+        |    view_times0,
+        |    click_times0,
+        |    view_uv_count0,
+        |    click_uv_count0,
+        |    play_time_count0,
+        |    play_times0,
+        |
+        |    0 view_times1,
+        |    0 click_times1,
+        |    0 view_uv_count1,
+        |    0 click_uv_count1,
+        |    0 play_time_count1,
+        |    0 play_times1,
+        |
+        |    0 view_times2,
+        |    0 click_times2,
+        |    0 view_uv_count2,
+        |    0 click_uv_count2,
+        |    0 play_time_count2,
+        |    0 play_times2,
+        |
+        |    0 view_times3,
+        |    0 click_times3,
+        |    0 view_uv_count3,
+        |    0 click_uv_count3,
+        |    0 play_time_count3,
+        |    0 play_times3
+        |from T1day
+        |UNION ALL
+        |
+        |select
+        |    video_id,
+        |    0 view_times0,
+        |    0 click_times0,
+        |    0 view_uv_count0,
+        |    0 click_uv_count0,
+        |    0 play_time_count0,
+        |    0 play_times0,
+        |
+        |    view_times1,
+        |    click_times1,
+        |    view_uv_count1,
+        |    click_uv_count1,
+        |    play_time_count1,
+        |    play_times1,
+        |
+        |    0 view_times2,
+        |    0 click_times2,
+        |    0 view_uv_count2,
+        |    0 click_uv_count2,
+        |    0 play_time_count2,
+        |    0 play_times2,
+        |
+        |    0 view_times3,
+        |    0 click_times3,
+        |    0 view_uv_count3,
+        |    0 click_uv_count3,
+        |    0 play_time_count3,
+        |    0 play_times3
+        |from T1week
+        |UNION ALL
+        |SELECT
+        |    video_id,
+        |    0 view_times0,
+        |    0 click_times0,
+        |    0 view_uv_count0,
+        |    0 click_uv_count0,
+        |    0 play_time_count0,
+        |    0 play_times0,
+        |
+        |    0 view_times1,
+        |    0 click_times1,
+        |    0 view_uv_count1,
+        |    0 click_uv_count1,
+        |    0 play_time_count1,
+        |    0 play_times1,
+        |
+        |    view_times2,
+        |    click_times2,
+        |    view_uv_count2,
+        |    click_uv_count2,
+        |    play_time_count2,
+        |    play_times2,
+        |
+        |    0 view_times3,
+        |    0 click_times3,
+        |    0 view_uv_count3,
+        |    0 click_uv_count3,
+        |    0 play_time_count3,
+        |    0 play_times3
+        |from T2week
+        |UNION ALL
+        |SELECT
+        |    video_id,
+        |    0 view_times0,
+        |    0 click_times0,
+        |    0 view_uv_count0,
+        |    0 click_uv_count0,
+        |    0 play_time_count0,
+        |    0 play_times0,
+        |
+        |    0 view_times1,
+        |    0 click_times1,
+        |    0 view_uv_count1,
+        |    0 click_uv_count1,
+        |    0 play_time_count1,
+        |    0 play_times1,
+        |
+        |    0 view_times2,
+        |    0 click_times2,
+        |    0 view_uv_count2,
+        |    0 click_uv_count2,
+        |    0 play_time_count2,
+        |    0 play_times2,
+        |
+        |    view_times3,
+        |    click_times3,
+        |    view_uv_count3,
+        |    click_uv_count3,
+        |    play_time_count3,
+        |    play_times3
+        |FROM T1month
+        |    ) temp_video_summary
+        |group by video_id
+      """.stripMargin
+
+    return APP_VIDEO_SUMMAY
   }
 
 }
