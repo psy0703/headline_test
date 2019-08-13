@@ -10,9 +10,9 @@ case class GiftTable(
                       event:String,
                       Type:String,
                       store_name:String,
-                      alg_match:String,
-                      alg_rank:String,
-                      rule:String,
+//                      alg_match:String,
+//                      alg_rank:String,
+//                      rule:String,
                       user_id:String,
                       video_id:String,
                       trace_id:String

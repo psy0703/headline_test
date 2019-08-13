@@ -1,8 +1,8 @@
 package com.dgmall.sparktest.dgmallTestV2.common
 
 import com.alibaba.fastjson.{JSON, JSONObject}
-import com.dgmall.sparktest.dgmallTest.appbean.{AppClick, AppView, AppWatch}
-import com.dgmall.sparktest.dgmallTest.bean.{ClickTable, CommenRecord, ViewTable, WatchTable}
+import com.dgmall.sparktest.dgmallTestV2.bean.{AppClick, AppView, AppWatch}
+import com.dgmall.sparktest.dgmallTestV2.caseclass.{ClickTable, CommenRecord, ViewTable, WatchTable}
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.spark.streaming.dstream.{DStream, InputDStream}
 
@@ -28,26 +28,26 @@ object ParseObject extends  Serializable {
     ds
   }
 
+
   def parseWatch(recordDs:DStream[CommenRecord]):DStream[WatchTable] = {
     recordDs
       .filter(x => {if (x.Event.contains("play")) true else false}) //过滤观看日志
       .map(x => {
       val properties: String = x.Properties.toString
       val watch: AppWatch = JSON.parseObject(properties, classOf[AppWatch])
+//      val words: Array[String] = watch.getTrace_id.split(".")
       //转换为观看表结构的类
       WatchTable(x.distinct_id, x.Time, x.Event, x.Type, watch.getTrace_id,
-        watch.getAlg_match, watch.getAlg_rank, watch.getRule, watch
-          .getBhv_amt, watch.getUser_id, watch.getVideo_id, watch
-          .getVideo_user_id, watch.getVideo_desc, watch.getVideo_tag, watch
-          .getWatch_time_long, watch.getVideo_long, watch.getMusic_name, watch
-          .getMusic_write, watch.getVideo_topic, watch.getVideo_address, watch
-          .getIs_attention, watch.getIs_like, watch.getIs_comment, watch
-          .getIs_share_weixin, watch.getIs_share_friendster, watch
-          .getIs_share_qq, watch.getIs_save, watch.getIs_get_red_packets,
+        watch.getOrder, watch.getUser_id, watch.getVideo_id,
+        watch.getVideo_user_id,  watch.getWatch_time_long,
+        watch.getIs_attention, watch.getIs_like, watch.getIs_comment,
+        watch.getIs_share_weixin, watch.getIs_share_friendster,
+        watch.getIs_share_qq, watch.getIs_save, watch.getIs_get_red_packets,
         watch.getRed_packets_sum, watch.getIs_copy_site, watch.getIs_report,
-        watch.getReport_content, watch.getIs_not_interested, watch
-          .getIs_go_shop, watch.getShop_id, watch.getShop_name)})
+        watch.getReport_content, watch.getIs_not_interested,
+        watch.getIs_go_shop, watch.getShop_id, watch.getShop_name)})
   }
+
 
   def parseView(recordDs:DStream[CommenRecord]):DStream[ViewTable] ={
     recordDs
@@ -55,12 +55,13 @@ object ParseObject extends  Serializable {
       .map(x => {
       val properties: String = x.Properties.toString
       val view: AppView = JSON.parseObject(properties, classOf[AppView])
+//      val words: Array[String] = view.getTrace_id.split(".")
       //转换为曝光表结构的类
       ViewTable(x.distinct_id, x.Time, x.Event, x.Type,
-        view.getAlg_match,view.getAlg_rank,view.getRule,
         view.getUser_id,view.getVideo_id,view.getTrace_id
         )})
   }
+
 
   def parseClick(recordDs:DStream[CommenRecord]):DStream[ClickTable] ={
     recordDs
@@ -68,10 +69,13 @@ object ParseObject extends  Serializable {
       .map(x => {
       val properties: String = x.Properties.toString
       val click: AppClick = JSON.parseObject(properties, classOf[AppClick])
-      //转换为曝光表结构的类
+//      val words: Array[String] = click.getTrace_id.split(".")
+      //转换为点击表结构的类
       ClickTable(x.distinct_id, x.Time, x.Event, x.Type,
-        click.getAlg_match,click.getAlg_rank,click.getRule,
-        click.getUser_id,click.getVideo_id,click.getTrace_id
+        click.getOrder,
+        click.getTrace_id,
+        click.getUser_id,
+        click.getVideo_id
       )})
   }
 

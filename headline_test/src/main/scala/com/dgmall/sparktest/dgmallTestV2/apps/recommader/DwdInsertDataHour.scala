@@ -22,14 +22,14 @@ object DwdInsertDataHour {
     sql("use headline_test")
 
     val month = "2019-08"
-    val day = "2019-08-09"
-    val hour = "16"
+    val day = "2019-08-12"
+    val hour = "18"
     val spe = "$."
 
     import com.dgmall.sparktest.dgmallTestV2.common.HeadlineSqls._
 
     //原始数据导入
-//    sql(load_ODS_LOG_SQL(month,day,hour)).show()
+    sql(load_ODS_LOG_SQL(month,day,hour)).show()
     //数据清洗
     sql(load_ETL_TEMP_SQL(day,hour)).show()
     //曝光日志
@@ -45,7 +45,7 @@ object DwdInsertDataHour {
     //上传视频信息
     sql(load_UPLOAD_VIDEO_LOG(day,hour)).show()
 
-
+    println("导入成功~~")
     spark.close()
   }
 }

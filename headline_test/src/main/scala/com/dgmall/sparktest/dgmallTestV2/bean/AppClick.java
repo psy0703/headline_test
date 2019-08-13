@@ -6,16 +6,16 @@ package com.dgmall.sparktest.dgmallTestV2.bean;
  * @Date: 2019/7/17 11:16
  */
 public class AppClick {
-    private Float  order;     //如果是推荐引导，取值推荐列表的展现次序
+    private String  order;     //如果是推荐引导，取值推荐列表的展现次序
     private String user_id;     //用户id
     private String video_id;    //视频id
     private String trace_id;    //由推荐引擎生成：appid.场景id.方案id.分桶id
 
-    public Float getOrder() {
+    public String getOrder() {
         return order;
     }
 
-    public void setOrder(Float order) {
+    public void setOrder(String order) {
         this.order = order;
     }
 

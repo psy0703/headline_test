@@ -18,7 +18,7 @@ object DwsInsertDataDay {
 
     import spark.implicits._
     import spark.sql
-    sql("show databases").show()
+//    sql("show databases").show()
     sql("use headline_test")
 
     val month = "2019-08"
@@ -35,7 +35,10 @@ object DwsInsertDataDay {
     sql(load_USER_SUMMARY_DAY_LOG(month, day)).show()
     //应用层视频信息汇总（天、周、月）
     sql(load_APP_VIDEO_SUMMARY(month, day)).show()
+    //应用层用户最近行为汇总
+    sql(load_APP_USER_ACTIONS_SUMMARY(day)).show()
 
+    println("导入成功~~")
     spark.close()
   }
 }

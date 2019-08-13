@@ -10,9 +10,9 @@ case class WatchTable(
                        Event: String,
                        Type: String,
                        trace_id: String, //由推荐引擎生成：appid.场景id.方案id.分桶id
-                       alg_match: String, //召回层策略，由推荐引擎生成
-                       alg_rank: String, //排序层策略，由推荐引擎生成
-                       rule: String, //规则层策略，由推荐引擎生成
+//                       alg_match: String, //召回层策略，由推荐引擎生成
+//                       alg_rank: String, //排序层策略，由推荐引擎生成
+//                       rule: String, //规则层策略，由推荐引擎生成
                        order: String, //如果是推荐引导，取值推荐列表的展现次序
                        user_id: String, //用户ID
                        video_id: String, //视频ID
