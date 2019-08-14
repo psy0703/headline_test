@@ -40,6 +40,11 @@
 </property>
 
 <property>
+    <name>hive.metastore.uris</name>
+    <value>thrift://psy831:9083</value>
+</property>
+
+<property>
    <name>datanucleus.autoStartMechanism</name>
    <value>SchemaTable</value>
 </property>

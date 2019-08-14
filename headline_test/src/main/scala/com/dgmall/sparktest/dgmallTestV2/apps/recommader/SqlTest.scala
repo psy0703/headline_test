@@ -15,7 +15,7 @@ object SqlTest {
       .enableHiveSupport()
       .getOrCreate()
 
-    //运行笛卡尔积
+    //允许笛卡尔积
     spark.conf.set("spark.sql.crossJoin.enabled", "true")
 
     System.setProperty("HADOOP_USER_NAME", "psy831")

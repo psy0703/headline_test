@@ -10,11 +10,13 @@ object DwsInsertDataDay {
   def main(args: Array[String]): Unit = {
     val spark: SparkSession = SparkSession.builder()
       .appName("DwsInsertDataDay")
-      .master("local[*]")
+      .master("local[4]")
       .enableHiveSupport()
       .getOrCreate()
 
     System.setProperty("HADOOP_USER_NAME", "psy831")
+    //允许笛卡尔积
+    spark.conf.set("spark.sql.crossJoin.enabled", "true")
 
     import spark.implicits._
     import spark.sql
@@ -22,7 +24,7 @@ object DwsInsertDataDay {
     sql("use headline_test")
 
     val month = "2019-08"
-    val day = "2019-08-07"
+    val day = "2019-08-14"
 
 
     val spe = "$."
@@ -33,6 +35,8 @@ object DwsInsertDataDay {
     sql(load_VIDEO_SUMMARY_DAY_LOG(month, day)).show()
     //用户行为汇总
     sql(load_USER_SUMMARY_DAY_LOG(month, day)).show()
+    //用户等级
+    sql(load_APP_USER_LEVEL(day)).show()
     //应用层视频信息汇总（天、周、月）
     sql(load_APP_VIDEO_SUMMARY(month, day)).show()
     //应用层用户最近行为汇总

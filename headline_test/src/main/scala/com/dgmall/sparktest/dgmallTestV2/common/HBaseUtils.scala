@@ -10,7 +10,7 @@ import org.apache.hadoop.hbase.{Cell, CellUtil, HBaseConfiguration, HColumnDescr
   * @Author: Cedaris
   * @Date: 2019/6/19 11:03
   */
-object HBaseUtils {
+object HBaseUtils extends Serializable {
 
   /**
     * 设置HBaseConfiguration

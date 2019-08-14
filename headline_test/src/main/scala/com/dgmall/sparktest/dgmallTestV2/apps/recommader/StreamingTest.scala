@@ -22,7 +22,7 @@ object StreamingTest {
   def main(args: Array[String]): Unit = {
     val batch = 10
     val sparkConf: SparkConf = new SparkConf()
-      .setAppName("pv_uv")
+      .setAppName("StreamingTest")
       .set("spark.streaming.kafka.consumer.cache.enabled", "false")
       .set("spark.debug.maxToStringFields", "100")
       .setIfMissing("spark.master", "local[*]")
@@ -63,11 +63,12 @@ object StreamingTest {
       json
     })
 
-    recordDs.foreachRDD(x=>{
+    recordDs.foreachRDD(x => {
       val spark = SparkSessionSingleton.getInstance(x.sparkContext.getConf)
       import spark.implicits._
       import spark.sql
 
+      //过滤出view曝光日志
       val viewDF: DataFrame = x.filter(y => if (y.Event.contains("view")) true else false)
         .map(x => {
           val properties: String = x.Properties.toString
@@ -80,6 +81,7 @@ object StreamingTest {
         }).toDF()
       viewDF.createOrReplaceTempView("tb_view")
 
+      //过滤出click点击日志
       val clickDF: DataFrame = x.filter(y => if (y.Event.contains("click")) true else false)
         .map(x => {
           val properties: String = x.Properties.toString
@@ -92,6 +94,7 @@ object StreamingTest {
         }).toDF()
       clickDF.createOrReplaceTempView("tb_click")
 
+      //转化格式，便于进行join操作
       sql(
         """
           |select
@@ -100,7 +103,7 @@ object StreamingTest {
           |concat(user_id , '-', video_id) as u_vcode
           |from tb_view
         """.stripMargin).createOrReplaceTempView("tb_view2")
-
+      //转化格式，便于进行join操作
       sql(
         """
           |select
@@ -110,6 +113,7 @@ object StreamingTest {
           |from tb_click
         """.stripMargin).createOrReplaceTempView("tb_click2")
 
+      //view和click日志按照 user_id-video_id 进行jion操作
       sql(
         """
           |select
@@ -125,35 +129,37 @@ object StreamingTest {
         """.stripMargin).createOrReplaceTempView("view_click")
 
 
-
       sql(
         """
           |select * from view_click
         """.stripMargin).show()
+
+      sql("show databases").show
     })
 
 
     //todo: 拼接HIVE离线数据
 
 
-
-
     ssc.start()
     ssc.awaitTermination()
-    ssc.stop(false,true)
+    ssc.stop(false, true)
   }
 
-  object SparkSessionSingleton{
-    @transient  private var instance: SparkSession = _
+  object SparkSessionSingleton {
+    @transient private var instance: SparkSession = _
 
     def getInstance(sparkConf: SparkConf): SparkSession = {
       if (instance == null) {
         instance = SparkSession
           .builder
           .config(sparkConf)
+          .enableHiveSupport()
+          .config("spark.sql.crossJoin.enabled", "true")
           .getOrCreate()
       }
       instance
     }
   }
+
 }

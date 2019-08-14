@@ -851,4 +851,76 @@ object HeadlineSqls {
     return APP_USER_ACTIONS_SUMMARY
   }
 
+  def load_APP_USER_LEVEL(day:String):String={
+    val APP_USER_LEVEL =
+      s"""
+        |with
+        |temp_user_count as(
+        |    select
+        |    user_count,
+        |    floor(user_count * 0.2) as level01,
+        |    floor(user_count * 0.8) as level02,
+        |    floor(user_count * 1) as level03
+        |    from(
+        |        select
+        |        count(distinct user_id) as user_count
+        |        from dws_user_action_summary_d
+        |        where day  BETWEEN date_sub('${day}',30) AND date_sub
+        |        ('${day}',1)
+        |    ) t1
+        |    ),
+        |temp_user_rank as(
+        |    select
+        |    user_id,
+        |    sum_play_long,
+        |    sum_play_times,
+        |    row_number() over(order by sum_play_long desc) as play_long_rank,
+        |    row_number() over(order by sum_play_times desc) as play_times_rank
+        |    from(
+        |        select
+        |        user_id,
+        |        sum(play_times) as sum_play_times,
+        |        sum(play_time_count) as sum_play_long
+        |        from dws_user_action_summary_d
+        |        where day  BETWEEN date_sub('${day}',30) AND date_sub('${day}',1)
+        |        group by user_id
+        |        ) t1
+        |    )
+        |
+        |INSERT OVERWRITE TABLE temp_user_level
+        |SELECT
+        |  user_id,
+        |  user_count,
+        |  sum_play_long,
+        |  sum_play_times,
+        |  play_long_rank,
+        |  play_times_rank,
+        |  level01,
+        |  level02,
+        |  level03,
+        |  (case when play_long_rank < level01 then 'L01'
+        |     WHEN play_long_rank > level01 and play_long_rank<level02 then 'L02'
+        |     ELSE 'L03' END) as value_type,
+        |  (case when play_times_rank < level01 then 'L01'
+        |     WHEN play_times_rank > level01 and play_times_rank<level02 then 'L02'
+        |     ELSE 'L03' END) as frequence_type
+        |FROM(
+        |  select
+        |    user_id,
+        |    user_count,
+        |    sum_play_long,
+        |    sum_play_times,
+        |    play_long_rank,
+        |    play_times_rank,
+        |    level01,
+        |    level02,
+        |    level03
+        |  from temp_user_rank
+        |  left join temp_user_count
+        |) tmp1
+      """.stripMargin
+    return APP_USER_LEVEL
+
+  }
+
 }

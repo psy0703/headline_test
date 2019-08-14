@@ -15,6 +15,8 @@ object DwdInsertDataHour {
       .getOrCreate()
 
     System.setProperty("HADOOP_USER_NAME", "psy831")
+    //允许笛卡尔积
+    spark.conf.set("spark.sql.crossJoin.enabled", "true")
 
     import spark.implicits._
     import spark.sql
@@ -22,8 +24,8 @@ object DwdInsertDataHour {
     sql("use headline_test")
 
     val month = "2019-08"
-    val day = "2019-08-12"
-    val hour = "18"
+    val day = "2019-08-14"
+    val hour = "14"
     val spe = "$."
 
     import com.dgmall.sparktest.dgmallTestV2.common.HeadlineSqls._
@@ -48,4 +50,5 @@ object DwdInsertDataHour {
     println("导入成功~~")
     spark.close()
   }
+
 }
