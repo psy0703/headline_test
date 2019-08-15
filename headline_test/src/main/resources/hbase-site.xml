@@ -53,9 +53,4 @@
     <name>hbase.regionserver.wal.codec</name>
     <value>org.apache.hadoop.hbase.regionserver.wal.IndexedWALEditCodec</value>
 </property>
-
-    <property>
-        <name>hbase.table.sanity.checks</name>
-        <value>false</value>
-    </property>
 </configuration>

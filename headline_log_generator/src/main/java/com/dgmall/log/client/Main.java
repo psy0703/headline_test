@@ -127,7 +127,7 @@ public class Main {
             producer.send(new ProducerRecord<String, String>("dgmall_log",
                     i + "", commonFields.toJSONString()));*/
             try {
-                Thread.sleep(20);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

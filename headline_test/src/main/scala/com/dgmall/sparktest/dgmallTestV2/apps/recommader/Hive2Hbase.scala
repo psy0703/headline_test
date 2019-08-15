@@ -3,9 +3,11 @@ package com.dgmall.sparktest.dgmallTestV2.apps.recommader
 import com.dgmall.sparktest.dgmallTestV2.bean.Constants
 import com.dgmall.sparktest.dgmallTestV2.common.ConfigureContext
 import org.apache.hadoop.hbase.{HBaseConfiguration, HColumnDescriptor, HTableDescriptor, TableName}
-import org.apache.hadoop.hbase.client.{ConnectionFactory, HBaseAdmin, Put}
+import org.apache.hadoop.hbase.client.{ConnectionFactory, Get, HBaseAdmin, Put, Result}
+import org.apache.hadoop.hbase.util.Bytes
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, SparkSession}
+
 import scala.collection.mutable.ListBuffer
 import scala.util.control._
 
@@ -27,9 +29,10 @@ object Hive2Hbase {
       .enableHiveSupport()
       .getOrCreate()
     System.setProperty("HADOOP_USER_NAME", "psy831")
+//    System.setProperty("HADOOP_USER_NAME", "dev")
 
     // hbase表
-    val hiveTable = "app_user_actions_summary"
+    val hiveTable = "headline:app_user_actions_summary"
     //Hive 表中的列
     //app_user_actions_summary
     var columnList = new ListBuffer[String]
@@ -50,7 +53,7 @@ object Hive2Hbase {
 
   println("成功将HIVE 中的app_user_actions_summary 导入 HBASE中")
 
-    val table2 = "app_video_summary"
+    val table2 = "headline:app_video_summary"
     var columnList2 = new ListBuffer[String]
     //app_video_summary
     columnList2.append("video_id",
@@ -72,7 +75,7 @@ object Hive2Hbase {
 
     println("成功将HIVE 中的app_video_summary导入到HBASE 中")
 
-    val table3 = "user_level"
+    val table3 = "headline:user_level"
     val sqlQurry3 =
       """
         |select
@@ -125,7 +128,30 @@ object Hive2Hbase {
       val columnDesc = new HColumnDescriptor(columnFamily)
       desc.addFamily(columnDesc)
       admin.createTable(desc)
+    }else{
+      val tableDesc: HTableDescriptor = admin.getTableDescriptor(tableName)
+      admin.disableTable(tableName)
+      //若列族已存在，先删除
+      tableDesc.removeFamily(Bytes.toBytes(columnFamily))
+      //创建新的列族
+      val columnDescriptor = new HColumnDescriptor(columnFamily)
+      tableDesc.addFamily(columnDescriptor)
+      admin.modifyTable(tableName,tableDesc)
+      admin.enableTable(tableName)
     }
+  }
+
+  def getData(tablename: String, rowkey: String, famliyname: String,
+              colum: String): String = {
+    val conn = getHBaseConnection()
+    val table = conn.getTable(TableName.valueOf(tablename))
+    // 将字符串转换成byte[]
+    val rowkeybyte: Array[Byte] = Bytes.toBytes(rowkey)
+    val get = new Get(rowkeybyte)
+    val result: Result = table.get(get)
+    val resultbytes = result.getValue(famliyname.getBytes, colum.getBytes)
+    if (resultbytes == null) {return null}
+    new String(resultbytes)
   }
 
   /**
@@ -139,6 +165,7 @@ object Hive2Hbase {
                      columnList:ListBuffer[String],sqlQurry:String,
                      columnFamily:String)
   : Unit ={
+    //hbase新建表或者添加列族
     createTable(hiveTableName,columnFamily)
 
     import spark.implicits._

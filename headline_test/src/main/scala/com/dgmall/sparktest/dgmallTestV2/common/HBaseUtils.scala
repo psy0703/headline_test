@@ -1,10 +1,13 @@
 package com.dgmall.sparktest.dgmallTestV2.common
 
 import java.util
+import com.dgmall.sparktest.dgmallTestV2.bean.Constants
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.hbase.{Cell, CellUtil, HBaseConfiguration, HColumnDescriptor, HTableDescriptor, TableName}
+import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 /**
   * @Author: Cedaris
@@ -23,6 +26,16 @@ object HBaseUtils extends Serializable {
     conf.set("hbase.zookeeper.property.clientPort",port)
 
     conf
+  }
+
+
+  def getHBaseConnection() = {
+    val conf = HBaseConfiguration.create
+    conf.set("hbase.zookeeper.property.clientPort", Constants.ZOOKEEPER_CLIENT_PORT)
+    conf.set("hbase.zookeeper.quorum", Constants.ZOOKEEPER_QUORUM)
+    conf.set("hbase.master", Constants.HBASE_MASTER)
+    conf.set("zookeeper.znode.parent", Constants.ZOOKEEPER_ZNODE_PARENT)
+    ConnectionFactory.createConnection(conf)
   }
 
   /**
@@ -78,6 +91,29 @@ object HBaseUtils extends Serializable {
 
     admin.createTable(desc)
     println("表:" + tableName + "创建成功!")
+  }
+
+  def createTable(hiveTable: String,columnFamily:String): Unit = {
+    val conn = getHBaseConnection()
+    val admin = conn.getAdmin.asInstanceOf[HBaseAdmin]
+    val tableName = TableName.valueOf(hiveTable)
+    if (!admin.tableExists(tableName)) {
+      // 表不存在则创建
+      val desc = new HTableDescriptor(tableName)
+      val columnDesc = new HColumnDescriptor(columnFamily)
+      desc.addFamily(columnDesc)
+      admin.createTable(desc)
+    }else{
+      val tableDesc: HTableDescriptor = admin.getTableDescriptor(tableName)
+      admin.disableTable(tableName)
+      //若列族已存在，先删除
+      tableDesc.removeFamily(Bytes.toBytes(columnFamily))
+      //创建新的列族
+      val columnDescriptor = new HColumnDescriptor(columnFamily)
+      tableDesc.addFamily(columnDescriptor)
+      admin.modifyTable(tableName,tableDesc)
+      admin.enableTable(tableName)
+    }
   }
 
   /**
@@ -193,6 +229,64 @@ object HBaseUtils extends Serializable {
       println("column = " + column)
       println("value = " + value)
     }
+  }
+
+  /**
+    * 获取指定rowKey、列族的数据
+    * @param admin
+    * @param tablename
+    * @param rowkey
+    * @param famliyname
+    * @return
+    */
+  def getDataByRowkeyCf(admin: Admin,
+                        tablename: String,
+                        rowkey: String,
+                        famliyname: String): mutable.HashMap[String,String] = {
+    val table: Table = admin.getConnection.getTable(TableName.valueOf(tablename))
+    // 将字符串转换成byte[]
+    val rowkeybyte: Array[Byte] = Bytes.toBytes(rowkey)
+    val get = new Get(rowkeybyte)
+    get.addFamily(famliyname.getBytes())
+    val result: Result = table.get(get)
+    val cells: Array[Cell] = result.rawCells()
+
+    import scala.collection.mutable.Map
+    var resultMap =new mutable.HashMap[String,String]
+
+
+    for(i <- 0 until(cells.length)) {
+      val value: String = Bytes.toString(CellUtil.cloneValue(cells(i)))
+      val column: String = Bytes.toString(CellUtil.cloneQualifier(cells(i)))
+
+      resultMap.put(column , value)
+    }
+
+    return resultMap
+  }
+
+  /**
+    * 获取指定rowKey、列族和列的数据
+    * @param admin
+    * @param tablename
+    * @param rowkey
+    * @param famliyname
+    * @param colum
+    * @return
+    */
+  def getDataByRowkeyCfColumn(admin: Admin,
+                              tablename: String,
+                              rowkey: String,
+                              famliyname: String,
+                              colum: String): String = {
+    val table: Table = admin.getConnection.getTable(TableName.valueOf(tablename))
+    // 将字符串转换成byte[]
+    val rowkeybyte: Array[Byte] = Bytes.toBytes(rowkey)
+    val get = new Get(rowkeybyte)
+    val result: Result = table.get(get)
+    val resultbytes = result.getValue(famliyname.getBytes, colum.getBytes)
+    if (resultbytes == null) {return null}
+    new String(resultbytes)
   }
 
   /**

@@ -1,7 +1,10 @@
 package com.dgmall.sparktest.dgmallTestV2.apps.recommader
 
+/**
+  * @Author: Cedaris
+  * @Date: 2019/8/15 17:05
+  */
 import java.lang
-
 import com.alibaba.fastjson.JSON
 import com.dgmall.sparktest.dgmallTestV2.apps.recommader.Hive2Hbase.getHBaseConnection
 import com.dgmall.sparktest.dgmallTestV2.bean.{AppClick, AppView, Constants}
@@ -25,7 +28,7 @@ import scala.collection.mutable.ListBuffer
   * @Author: Cedaris
   * @Date: 2019/8/13 15:47
   */
-object StreamingTest {
+object StreamingTestV2 {
   def main(args: Array[String]): Unit = {
     val batch = 10
     val sparkConf: SparkConf = new SparkConf()
@@ -64,9 +67,9 @@ object StreamingTest {
     )
 
     //需要读取的hbase 的表
-    val hiveTableName1 = "headline:app_user_actions_summary"
-    val hiveTableName2 = "headline:app_video_summary"
-    val hiveTableName3 = "headline:user_level"
+    val hiveTableName1 = "headlineV2:app_user_actions_summary"
+    val hiveTableName2 = "headlineV2:app_video_summary"
+    val hiveTableName3 = "headlineV2:user_level"
     //列族
     val cf1 = Constants.HBASE_COLUMN_FAMILY
     val day = "2019-08-14"
@@ -189,24 +192,24 @@ object StreamingTest {
         val tableName3 = TableName.valueOf(hiveTableName3)
         val table3 = conn.getTable(tableName3)
 
+        val columnName = "info"
+
         partition.foreach(row => {
           //从HBASE获取用户行为汇总信息
-          val user_actions_map: mutable.HashMap[String, String] =
-            getDataByRowkeyCf(admin, hiveTableName1, row.user_id_1, cf1)
+          val user_actions_map: String =
+            getDataByRowkeyCfColumn(admin, hiveTableName1, row.user_id_1,cf1,columnName)
 
           //从HBASE获取视频指标汇总信息
-          val video_summary_map: mutable.HashMap[String, String] =
-            getDataByRowkeyCf(admin, hiveTableName2, row.video_id_1, cf2)
+          val video_summary_map: String =
+            getDataByRowkeyCfColumn(admin, hiveTableName2, row.video_id_1,cf2,columnName)
 
           //从HBASE获取用户等级信息
-          val user_level_map: mutable.HashMap[String, String] =
-            getDataByRowkeyCf(admin, hiveTableName3, row.user_id_1, cf3)
+          val user_level_map: String =
+            getDataByRowkeyCfColumn(admin, hiveTableName3, row.user_id_1, cf3,columnName)
 
-          /*user_level_map.getOrElse("user_id", "0")
-          user_level_map.getOrElse("value_type", "0")
-          user_level_map.getOrElse("frequence_type", "0")*/
+          println(user_level_map)
 
-          println(hbase2UserActions(user_actions_map).toString)
+//          println(hbase2UserActions(user_actions_map).toString)
 
 
         })
@@ -218,56 +221,25 @@ object StreamingTest {
       })
     })
 
-    //todo: 拼接HIVE离线数据
 
     ssc.start()
     ssc.awaitTermination()
     ssc.stop(false, true)
   }
 
+  //从HBASE 读出用户行为汇总数据
   def hbase2UserActions(map: mutable.HashMap[String, String]): UserActionsSummay = {
-    UserActionsSummay(
-      map.getOrElse("user_id", "0"),
-      map.getOrElse("time", "0"),
-      map.getOrElse("watch_last_time", "0"),
-      map.getOrElse("timesincelastwatch", 0.0).toString.toDouble,
-      map.getOrElse("timesincelastwatchsqrt", 0.0).toString.toDouble,
-      map.getOrElse("timesincelastwatchsquare", 0.0).toString.toDouble,
-      mkArrayString(map.getOrElse("behaviorvids", 0).toString.split(","),10,"-1"),
-      mkArrayString(map.getOrElse("behavioraids", 0).toString.split(","),10,"-1"),
-      mkArrayString(map.getOrElse("behaviorcids", 0).toString.split(","),10,"-1"),
-      mkArrayString(map.getOrElse("behaviorc1ids", 0).toString.split(","),10,"-1"),
-      mkArrayString(map.getOrElse("behaviortokens", 0).toString.split(","),10,"-1"),
-      mkArrayString(map.getOrElse("cate1_prefer", 0).toString.split(","),10,"-1"),
-      mkArrayDouble(map.getOrElse("weights_cate1_prefer", 0.0).toString.split
-      (","),10,"0"),
-      mkArrayString(map.getOrElse("cate2_prefer", 0).toString.split(","),10,"-1"),
-      mkArrayDouble(map.getOrElse("weights_cate2_prefer", 0.0).toString.split
-      (","),10,"0")
-    )
-
+    val jsonStr: String = map.getOrElse("info","0")
+    val result: UserActionsSummay = JSON.parseObject(jsonStr,
+      classOf[UserActionsSummay])
+    result
   }
 
+  //从HBASE读出视频指标汇总信息
   def hbase2VideoSummay(map: mutable.HashMap[String, String]):VideoIndexSummay={
-    VideoIndexSummay(
-      map.getOrElse("video_id", "0"),
-      map.getOrElse("ctr_1day", 0.0).toString.toDouble,
-      map.getOrElse("uv_ctr_1day", 0.0).toString.toDouble,
-      map.getOrElse("play_long_1day", 0.0).toString.toDouble,
-      map.getOrElse("play_times_1day", 0.0).toString.toDouble,
-      map.getOrElse("ctr_1week", 0.0).toString.toDouble,
-      map.getOrElse("uv_ctr_1week", 0.0).toString.toDouble,
-      map.getOrElse("play_long_1week", 0.0).toString.toDouble,
-      map.getOrElse("play_times_1week", 0.0).toString.toDouble,
-      map.getOrElse("ctr_2week", 0.0).toString.toDouble,
-      map.getOrElse("uv_ctr_2week", 0.0).toString.toDouble,
-      map.getOrElse("play_long_2week", 0.0).toString.toDouble,
-      map.getOrElse("play_times_2week", 0.0).toString.toDouble,
-      map.getOrElse("ctr_1month", 0.0).toString.toDouble,
-      map.getOrElse("uv_ctr_1month", 0.0).toString.toDouble,
-      map.getOrElse("play_long_1month", 0.0).toString.toDouble,
-      map.getOrElse("play_times_1month", 0.0).toString.toDouble
-    )
+    val jsonStr: String = map.getOrElse("info","0")
+    val result: VideoIndexSummay = JSON.parseObject(jsonStr,classOf[VideoIndexSummay])
+    result
   }
 
   /**
