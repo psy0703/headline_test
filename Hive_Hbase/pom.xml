@@ -4,9 +4,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.ng.dgmall</groupId>
-    <artifactId>headline_test</artifactId>
+    <groupId>com.dgmall</groupId>
+    <artifactId>Hive_Hbase</artifactId>
     <version>1.0-SNAPSHOT</version>
+
     <properties>
         <!-- MaxComputer_Spark2.3.0自带 -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -220,23 +221,17 @@
         </dependency>
 
         <!-- gson -->
-        <dependency>
+<!--        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.8.5</version>
-        </dependency>
-
-      <!--  <dependency>
-            <groupId>org.apache.hbase</groupId>
-            <artifactId>hbase-spark</artifactId>
-            <version>2.0.0-alpha4</version>
         </dependency>-->
 
-        <dependency>
-            <groupId>org.tensorflow</groupId>
-            <artifactId>spark-tensorflow-connector_2.11</artifactId>
-            <version>1.14.0</version>
-        </dependency>
+        <!--  <dependency>
+              <groupId>org.apache.hbase</groupId>
+              <artifactId>hbase-spark</artifactId>
+              <version>2.0.0-alpha4</version>
+          </dependency>-->
 
     </dependencies>
 
@@ -295,7 +290,6 @@
                 </configuration>
 
             </plugin>
-
             <!--<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -337,7 +331,7 @@
             </plugin>-->
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.1</version>
+                <version>2.3.2</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>

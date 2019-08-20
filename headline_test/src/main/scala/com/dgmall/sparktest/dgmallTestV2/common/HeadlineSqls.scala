@@ -503,20 +503,20 @@ object HeadlineSqls {
         |PARTITION (month = '${month}' , day = '${day}')
         |select
         |    video_id,
-        |    NVL(round(sum(view_times0)/sum(click_times0), 3),0) as ctr_1day,
-        |    NVL(round(sum(view_uv_count0)/sum(click_uv_count0), 3),0) as uv_ctr_1day,
+        |    NVL(round(sum(click_times0)/sum(view_times0), 3),0) as ctr_1day,
+        |    NVL(round(sum(click_uv_count0)/sum(view_uv_count0), 3),0) as uv_ctr_1day,
         |    NVL(sum(play_time_count0),0) as play_long_1day,
         |    NVL(sum(play_times0),0) as play_times_1day,
-        |    NVL(round(sum(view_times1)/sum(click_times1), 3),0) as ctr_1week,
-        |    NVL(round(sum(view_uv_count1)/sum(click_uv_count1), 3),0) as uv_ctr_1week,
+        |    NVL(round(sum(click_times1)/sum(view_times1), 3),0) as ctr_1week,
+        |    NVL(round(sum(click_uv_count1)/sum(view_uv_count1), 3),0) as uv_ctr_1week,
         |    NVL(SUM(play_time_count1),0) as play_long_1week,
         |    NVL(SUM(play_times1),0) as play_times_1week,
-        |    NVL(round(sum(view_times2)/sum(click_times2), 3),0) ctr_2week,
-        |    NVL(round(sum(view_uv_count2)/sum(click_uv_count2), 3),0) as uv_ctr_2week,
+        |    NVL(round(sum(click_times2)/sum(view_times2), 3),0) ctr_2week,
+        |    NVL(round(sum(click_uv_count2)/sum(view_uv_count2), 3),0) as uv_ctr_2week,
         |    NVL(SUM(play_time_count2),0) as play_long_2week,
         |    NVL(SUM(play_times2),0) as play_times_2week,
-        |    NVL(round(sum(view_times3)/sum(click_times3), 3),0) as ctr_1month,
-        |    NVL(round(sum(view_uv_count3)/sum(click_uv_count3), 3),0) as uv_ctr_1month,
+        |    NVL(round(sum(click_times3)/sum(view_times3), 3),0) as ctr_1month,
+        |    NVL(round(sum(click_uv_count3)/sum(view_uv_count3), 3),0) as uv_ctr_1month,
         |    NVL(SUM(play_time_count3),0) as play_long_1month,
         |    NVL(SUM(play_times3),0) as play_times_1month
         |FROM

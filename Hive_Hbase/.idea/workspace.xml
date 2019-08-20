@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="beb91544-109f-4f8d-b16d-d8d1798b3ba1" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Hive_Hbase.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/scala/bean/AppUserActions.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/scala/bean/AppUserInfo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/scala/bean/AppVideoIndex.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/scala/caseclass/ModelFeatures.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/scala/common/HBaseUtils.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/scala/common/ParseObject.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/scala/recommader/StreamingTestV2.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../IdeaProjects/MyTestCode/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../IdeaProjects/MyTestCode/.idea/MyTestCode.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../IdeaProjects/MyTestCode/.idea/codeStyles/Project.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../IdeaProjects/MyTestCode/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../headline_log_generator/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../headline_log_generator/.idea/codeStyles/Project.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../headline_log_generator/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../headline_log_generator/.idea/headline_log_generator.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../headline_test/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../headline_test/.idea/codeStyles/Project.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../headline_test/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../headline_test/.idea/headline_test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/DemoTest.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/apps/recommader/Kafka2KafkaStreaming.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/bean/AppUserActions.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/bean/AppUserInfo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/bean/AppVideoIndex.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/caseclass/ModelFeatures.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/common/KafkaSink.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headline_log_generator/src/main/java/com/dgmall/log/client/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/../headline_log_generator/src/main/java/com/dgmall/log/client/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headline_test/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../headline_test/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headline_test/src/main/resources/hbase-site.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../headline_test/src/main/resources/hbase-site.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/apps/recommader/DwdInsertDataHour.scala" beforeDir="false" afterPath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/apps/recommader/DwdInsertDataHour.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/apps/recommader/DwsInsertDataDay.scala" beforeDir="false" afterPath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/apps/recommader/DwsInsertDataDay.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/apps/recommader/Hive2Hbase.scala" beforeDir="false" afterPath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/apps/recommader/Hive2Hbase.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/apps/recommader/Hive2HbaseTest.scala" beforeDir="false" afterPath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/apps/recommader/Hive2HbaseTest.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/apps/recommader/StreamingTestV2.scala" beforeDir="false" afterPath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/apps/recommader/StreamingTestV2.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/bean/Constants.java" beforeDir="false" afterPath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/bean/Constants.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/common/ConfigureContext.scala" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/common/HBaseUtils.scala" beforeDir="false" afterPath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/common/HBaseUtils.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/common/HbaseClient.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/common/HeadlineSqls.scala" beforeDir="false" afterPath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/common/HeadlineSqls.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/common/ParseObject.scala" beforeDir="false" afterPath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/common/ParseObject.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../headline_test/src/main/scala/com/dgmall/sparktest/dgmallTestV2/d.java" beforeDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CodeStyleSettingsInfer">
+    <option name="done" value="true" />
+  </component>
+  <component name="CompilerWorkspaceConfiguration">
+    <option name="MAKE_PROJECT_ON_SAVE" value="true" />
+  </component>
+  <component name="DefaultGradleProjectSettings">
+    <option name="isMigrated" value="true" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$/.." value="master" />
+      </map>
+    </option>
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHome" value="D:/Program Files/apache-maven-3.6.1" />
+        <option name="userSettingsFile" value="D:\Program Files\apache-maven-3.6.1\conf\settings.xml" />
+      </MavenGeneralSettings>
+    </option>
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="importAutomatically" value="true" />
+        <option name="jdkForImporter" value="1.8" />
+        <option name="vmOptionsForImporter" value="-Xmx768m" />
+      </MavenImportingSettings>
+    </option>
+  </component>
+  <component name="ProjectCodeStyleSettingsMigration">
+    <option name="version" value="1" />
+  </component>
+  <component name="ProjectId" id="1PUr59NXOC9Zj0vR6gDFUyNGX7O" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/main/scala/bean" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="project.structure.last.edited" value="Global Libraries" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.47292817" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.import" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="recommader" />
+      <recent name="common" />
+      <recent name="caseclass" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\MyCode\Hive_Hbase\src\main\scala\bean" />
+      <recent name="E:\MyCode\Hive_Hbase\src\main\resources" />
+      <recent name="E:\MyCode\Hive_Hbase\src\main\scala" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Application.StreamingTestV2">
+    <configuration name="Hive2HbaseTest" type="Application" factoryName="Application" temporary="true">
+      <option name="MAIN_CLASS_NAME" value="recommader.Hive2HbaseTest" />
+      <module name="Hive_Hbase" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="recommader.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="StreamingTest" type="Application" factoryName="Application" temporary="true">
+      <option name="MAIN_CLASS_NAME" value="recommader.StreamingTest" />
+      <module name="Hive_Hbase" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="recommader.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="StreamingTestV2" type="Application" factoryName="Application" temporary="true">
+      <option name="MAIN_CLASS_NAME" value="recommader.StreamingTestV2" />
+      <module name="Hive_Hbase" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="recommader.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.StreamingTestV2" />
+        <item itemvalue="Application.StreamingTest" />
+        <item itemvalue="Application.Hive2HbaseTest" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="beb91544-109f-4f8d-b16d-d8d1798b3ba1" name="Default Changelist" comment="" />
+      <created>1565923164788</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1565923164788</updated>
+      <workItem from="1565923167707" duration="645000" />
+      <workItem from="1565924120156" duration="2538000" />
+      <workItem from="1565927895070" duration="1028000" />
+      <workItem from="1565933868205" duration="2747000" />
+      <workItem from="1565937060124" duration="366000" />
+      <workItem from="1565939330770" duration="46000" />
+      <workItem from="1565939394830" duration="3551000" />
+      <workItem from="1565942964408" duration="1085000" />
+      <workItem from="1565944307131" duration="5555000" />
+      <workItem from="1566175206213" duration="2630000" />
+      <workItem from="1566261705709" duration="5927000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

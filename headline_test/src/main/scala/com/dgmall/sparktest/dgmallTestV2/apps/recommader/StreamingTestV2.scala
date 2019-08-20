@@ -5,50 +5,71 @@ package com.dgmall.sparktest.dgmallTestV2.apps.recommader
   * @Date: 2019/8/15 17:05
   */
 import java.lang
-import com.alibaba.fastjson.JSON
-import com.dgmall.sparktest.dgmallTestV2.apps.recommader.Hive2Hbase.getHBaseConnection
-import com.dgmall.sparktest.dgmallTestV2.bean.{AppClick, AppView, Constants}
-import com.dgmall.sparktest.dgmallTestV2.caseclass.{ClickTable, CommenRecord, UserActionsSummay, VideoIndexSummay, ViewTable}
+import java.util.Properties
+
+import com.alibaba.fastjson.{JSON, JSONObject}
+import com.dgmall.sparktest.dgmallTestV2.bean._
+import com.dgmall.sparktest.dgmallTestV2.caseclass._
+import com.dgmall.sparktest.dgmallTestV2.common.HBaseUtils._
+import com.dgmall.sparktest.dgmallTestV2.common.{KafkaSink, ParseObject}
 import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client.HBaseAdmin
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.common.serialization.StringSerializer
 import org.apache.spark.SparkConf
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.streaming.dstream.{DStream, InputDStream}
 import org.apache.spark.streaming.kafka010.ConsumerStrategies.Subscribe
 import org.apache.spark.streaming.kafka010.KafkaUtils
 import org.apache.spark.streaming.kafka010.LocationStrategies.PreferConsistent
-import com.dgmall.sparktest.dgmallTestV2.common.HBaseUtils._
+import org.apache.spark.streaming.{Seconds, StreamingContext}
+import org.slf4j.LoggerFactory
 
-import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
 
-/**
-  * @Author: Cedaris
-  * @Date: 2019/8/13 15:47
-  */
 object StreamingTestV2 {
+
+  private val LOG = LoggerFactory.getLogger("StreamingTestV2")
+  private val STOP_FLAG = "TEST_STOP_FLAG"
+
   def main(args: Array[String]): Unit = {
+
+    //spark conf 配置
     val batch = 10
     val sparkConf: SparkConf = new SparkConf()
-      .setAppName("StreamingTest")
+      .setAppName("StreamingTestV3")
       .set("spark.streaming.kafka.consumer.cache.enabled", "false")
       .set("spark.debug.maxToStringFields", "100")
       .setIfMissing("spark.master", "local[*]")
       .set("spark.streaming.kafka.maxRatePerPartition", "20000")
+      .set("spark.driver.memory", "1024M")
 
     //Spark streaming 配置
     val ssc = new StreamingContext(sparkConf, Seconds(batch))
-    System.setProperty("HADOOP_USER_NAME", "psy831")
-    ssc.checkpoint("hdfs://psy831:9000/checkpoint/headline_test")
+    System.setProperty("HADOOP_USER_NAME", "dev")
+    ssc.checkpoint("hdfs://dev-node02:9000/spark/checkpoint/StreamingTest")
 
     //定义kafka参数
-    val bootstrap: String = "psy831:9092,psy832:9092,psy833:9092"
+    val bootstrap: String = "dev-node01:9092,dev-node02:9092,dev-node03:9092"
     val topic: Array[String] = Array("dgmall_log")
-    val consumergroup: String = "headline_test813"
-    val partition: Int = 1 //测试topic只有一个分区
-    val start_offset: Long = 0l
+    val consumergroup: String = "headline_test04"
+//    val partition: Int = 1 //测试topic只有一个分区
+//    val start_offset: Long = 0l
+
+    // 初始化KafkaSink,并广播
+    val kafkaProducer: Broadcast[KafkaSink[String, String]] = {
+      val kafkaProducerConfig = {
+        val p = new Properties()
+        p.setProperty("bootstrap.servers", bootstrap)
+        p.setProperty("key.serializer", classOf[StringSerializer].getName)
+        p.setProperty("value.serializer", classOf[StringSerializer].getName)
+        p
+      }
+      if (LOG.isInfoEnabled)
+        LOG.info("kafka producer init done!")
+      ssc.sparkContext.broadcast(KafkaSink[String, String](kafkaProducerConfig))
+    }
+
 
     //将kafka参数映射为map
     val kafkaParams: Map[String, Object] = Map[String, Object](
@@ -59,6 +80,7 @@ object StreamingTestV2 {
       "auto.offset.reset" -> "latest",
       "enable.auto.commit" -> (false: lang.Boolean)
     )
+
     //通过KafkaUtil创建KafkaDStream
     val stream: InputDStream[ConsumerRecord[String, String]] = KafkaUtils.createDirectStream(
       ssc,
@@ -66,34 +88,17 @@ object StreamingTestV2 {
       Subscribe[String, String](topic, kafkaParams)
     )
 
+
     //需要读取的hbase 的表
-    val hiveTableName1 = "headlineV2:app_user_actions_summary"
-    val hiveTableName2 = "headlineV2:app_video_summary"
-    val hiveTableName3 = "headlineV2:user_level"
+    val hiveTableName1 = "headlineV2:app_user_actions_info_summary"
+    val hiveTableName2 = "headlineV2:app_video_index_info_summary"
     //列族
-    val cf1 = Constants.HBASE_COLUMN_FAMILY
-    val day = "2019-08-14"
-    val cf2 = day
-    val cf3 = "User_Level"
-
-    //app_user_actions_summary
-    var user_actions_list = new ListBuffer[String]
-    user_actions_list.append("user_id", "time", "watch_last_time", "timesincelastwatch",
-      "timesincelastwatchsqrt", "timesincelastwatchsquare", "behaviorvids",
-      "behavioraids", "behaviorcids", "behaviorc1ids", "behaviortokens",
-      "cate1_prefer", "weights_cate1_prefer", "cate2_prefer", "weights_cate2_prefer")
-
-    //app_video_summary
-    var video_summary_list = new ListBuffer[String]
-    video_summary_list.append("video_id",
-      "ctr_1day", "uv_ctr_1day", "play_long_1day", "play_times_1day",
-      "ctr_1week", "uv_ctr_1week", "play_long_1week", "play_times_1week",
-      "ctr_2week", "uv_ctr_2week", "play_long_2week", "play_times_2week",
-      "ctr_1month", "uv_ctr_1month", "play_long_1month", "play_times_1month")
-
-    var user_level_list = new ListBuffer[String]
-    user_level_list.append("user_id", "sum_play_long", "sum_play_times",
-      "play_long_rank", "play_times_rank", "value_type", "frequence_type")
+    val cf1 = "user_actions"
+    val cf2 = "video_index"
+    val cf3 = "User_Info"
+    val cf4 = "video_info"
+    //列
+    val columnName = "info"
 
 
     //读取kafka的数据并转化为日志格式
@@ -168,127 +173,148 @@ object StreamingTestV2 {
           |on t1.u_vcode = t2.u_vcode
         """.stripMargin).createOrReplaceTempView("view_click")
 
-      sql(
-        """
-          |select * from view_click
-        """.stripMargin).show()
 
       val user_videoDf: DataFrame = sql(
         """
         select user_id_1,video_id_1,is_click from view_click
         """.stripMargin)
 
+      user_videoDf.show(20)
+
       //通过用户id和视频id查询保存在hbase中的离线指标信息
-      user_videoDf.as[UserVideo].foreachPartition(partition => {
-        val conn = getHBaseConnection()
-        val admin = conn.getAdmin.asInstanceOf[HBaseAdmin]
+      user_videoDf.as[UserVideo]
+        .repartition(5)
+        .foreachPartition(partition => {
+          val conn = getHBaseConnection()
+          val admin = conn.getAdmin.asInstanceOf[HBaseAdmin]
 
-        val tableName1 = TableName.valueOf(hiveTableName1)
-        val table1 = conn.getTable(tableName1)
+          val tableName1 = TableName.valueOf(hiveTableName1)
+          val table1 = conn.getTable(tableName1)
 
-        val tableName2 = TableName.valueOf(hiveTableName2)
-        val table2 = conn.getTable(tableName2)
+          val tableName2 = TableName.valueOf(hiveTableName2)
+          val table2 = conn.getTable(tableName2)
 
-        val tableName3 = TableName.valueOf(hiveTableName3)
-        val table3 = conn.getTable(tableName3)
+          partition.foreach(
+            row => {
+              println(row.user_id_1 + "\t" + row.video_id_1 + "\t" + row.is_click)
+              //从HBASE获取用户行为汇总信息
+              var user_actions: String =
+                getDataByRowkeyCfColumn(admin, hiveTableName1, row.user_id_1, cf1, columnName)
 
-        val columnName = "info"
+              //从HBASE获取视频指标汇总信息
+              var video_summary: String =
+                getDataByRowkeyCfColumn(admin, hiveTableName2, row.video_id_1, cf2, columnName)
 
-        partition.foreach(row => {
-          //从HBASE获取用户行为汇总信息
-          val user_actions_map: String =
-            getDataByRowkeyCfColumn(admin, hiveTableName1, row.user_id_1,cf1,columnName)
+              //从HBASE获取用户等级信息
+              var user_info: String =
+                getDataByRowkeyCfColumn(admin, hiveTableName1, row.user_id_1, cf3, columnName)
 
-          //从HBASE获取视频指标汇总信息
-          val video_summary_map: String =
-            getDataByRowkeyCfColumn(admin, hiveTableName2, row.video_id_1,cf2,columnName)
+              //从HBASE获取视频信息
+              var video_info: String =
+                getDataByRowkeyCfColumn(admin, hiveTableName2, row.video_id_1, cf4, columnName)
 
-          //从HBASE获取用户等级信息
-          val user_level_map: String =
-            getDataByRowkeyCfColumn(admin, hiveTableName3, row.user_id_1, cf3,columnName)
+              //todo 调试专用 hbase中读取到数据为null时 ，采用默认数据
+              if (user_actions == null) {
+                val default_userAction = "{\"weights_cate1_prefer\":\"WrappedArray(1.0)\",\"weights_cate2_prefer\":\"WrappedArray(1.0)\",\"watch_last_time\":\"2019-08-13 16:08:03\",\"timesincelastwatchsqrt\":\"395.29\",\"behaviortokens\":\"WrappedArray(炭你项矮狐, 训穗特医肄, 哇瘁蛾高淌, 乞酱刽伍基, 萎曼职般疾, 挑秤邮遭累, 铂惦卸恤眶, 摹刁莹悔午, 余铣峦浦芍, 薯萧靳捂文)\",\"cate1_prefer\":\"WrappedArray(25)\",\"cate2_prefer\":\"WrappedArray(93)\",\"timesincelastwatch\":\"156256.0\",\"behaviorcids\":\"WrappedArray(25, 0, 0, 0, 0, 0, 0)\",\"behaviorc1ids\":\"WrappedArray(93, 0, 0, 0, 0, 0, 0)\",\"timesincelastwatchsquare\":\"2.4415937536E10\",\"behaviorvids\":\"WrappedArray(76907, 15441, 43287, 61437, 15640, 56980, 29633)\",\"user_id\":\"07924\",\"time\":\"2019-08-15 11:32:19\",\"behavioraids\":\"WrappedArray(83483, 0, 0, 0, 0, 0, 0)\"}"
+                user_actions = default_userAction
+              }
 
-          println(user_level_map)
+              if (video_summary == null) {
+                val defalut_videoSummary = "{\"uv_ctr_1day\":\"0.0\",\"uv_ctr_1week\":\"0.429\",\"play_times_2week\":\"2.0\",\"play_long_2week\":\"171.0\",\"play_times_1day\":\"0.0\",\"ctr_1day\":\"0.0\",\"ctr_1week\":\"0.429\",\"play_times_1week\":\"2.0\",\"ctr_2week\":\"0.429\",\"play_long_1week\":\"171.0\",\"uv_ctr_1month\":\"0.429\",\"play_times_1month\":\"2.0\",\"uv_ctr_2week\":\"0.429\",\"play_long_1month\":\"171.0\",\"ctr_1month\":\"0.429\",\"video_id\":\"49637\",\"play_long_1day\":\"0.0\"}"
+                video_summary = defalut_videoSummary
+              }
+              if (user_info == null) {
+                val default_userInfo = "{\"sum_play_long\":\"129.0\",\"value_type\":\"L02\",\"frequence_type\":\"L02\",\"user_id\":\"68852\",\"sum_play_times\":\"3\",\"play_times_rank\":\"71997\",\"play_long_rank\":\"72252\"}"
+                user_info = default_userInfo
+              }
+              if (video_info == null) {
+                val default_videoInfo = "{\"upload_time\":\"2019-08-15 18:01:02\",\"video_child_tag\":\"101\",\"music_write\":\"xxx\",\"video_address\":\"xxx\",\"user_id\":\"01341\",\"video_topic\":\"体育\",\"music_name\":\"xxx\",\"video_long\":\"871\",\"video_tag\":\"18\",\"video_id\":\"65842\",\"video_desc\":\"xxx\"}"
+                video_info = default_videoInfo
+              }
 
-//          println(hbase2UserActions(user_actions_map).toString)
+              println(user_actions)
+              println(video_summary)
+              println(user_info)
+              println(video_info)
+
+              val userActions: AppUserActions = ParseObject.parseUserActions(user_actions)
+              val videoIndex: AppVideoIndex = ParseObject.parseVideoIndex(video_summary)
+              val userInfo: AppUserInfo = ParseObject.parseUserInfo(user_info)
+              val videoInfo: AppReleaseVideo = ParseObject.parseVideoInfo(video_info)
 
 
+              //创建json对象
+              val json = new JSONObject()
+
+              json.put("audience_id", row.user_id_1)
+              json.put("item_id", row.video_id_1)
+              json.put("click", row.is_click.toString)
+              json.put("city", "深圳")
+              json.put("value_type", userInfo.getValue_type)
+              json.put("frequence_type",userInfo.getFrequence_type)
+              json.put("cate1_prefer", userActions.getCate1_prefer)
+              json.put("cate2_prefer", userActions.getCate2_prefer)
+              json.put("weights_cate1_prefer", userActions.getWeights_cate1_prefer)
+              json.put("weights_cate2_prefer", userActions.getWeights_cate2_prefer)
+              json.put("cate2Id", videoInfo.getVideo_child_tag)
+              json.put("ctr_1d", videoIndex.getCtr_1day.toString)
+              json.put("uv_ctr_1d", videoIndex.getUv_ctr_1day.toString)
+              json.put("play_long_1d", videoIndex.getPlay_long_1day.toString)
+              json.put("play_times_1d", videoIndex.getPlay_times_1day.toString)
+              json.put("ctr_1w", videoIndex.getCtr_1week.toString)
+              json.put("uv_ctr_1w", videoIndex.getUv_ctr_1week.toString)
+              json.put("play_long_1w", videoIndex.getPlay_long_1week.toString)
+              json.put("play_times_1w", videoIndex.getPlay_times_1week.toString)
+              json.put("ctr_2w", videoIndex.getCtr_2week.toString)
+              json.put("uv_ctr_2w",videoIndex.getUv_ctr_2week.toString)
+              json.put("play_long_2w", videoIndex.getPlay_long_2week.toString)
+              json.put("play_times_2w", videoIndex.getPlay_times_2week.toString)
+              json.put("ctr_1m", videoIndex.getCtr_1month.toString)
+              json.put("uv_ctr_1m", videoIndex.getUv_ctr_1month.toString)
+              json.put("play_long_1m", videoIndex.getPlay_long_1month.toString)
+              json.put("play_times_1m", videoIndex.getPlay_times_1month.toString)
+              json.put("matchScore", "0")
+              json.put("popScore", "0")
+              json.put("exampleAge", "0")
+              json.put("cate2Prefer", "0")
+              json.put("catePrefer", "0")
+              json.put("authorPrefer", "0")
+              json.put("position", "1")
+              json.put("triggerNum", "0")
+              json.put("triggerRank", "0")
+              json.put("hour", "0")
+              json.put("phoneBrand", "HW")
+              json.put("phoneResolution", "1920*1080")
+              json.put("timeSinceLastWatchSqrt",userActions.getTimesincelastwatchsqrt.toString)
+              json.put("timeSinceLastWatch",  userActions.getTimesincelastwatch.toString)
+              json.put("timeSinceLastWatchSquare", userActions.getTimesincelastwatchsquare.toString)
+              json.put("behaviorCids", userActions.getBehaviorcids)
+              json.put("behaviorC1ids", userActions.getBehaviorc1ids)
+              json.put("behaviorAids", userActions.getBehavioraids)
+              json.put("behaviorVids", userActions.getBehaviorvids)
+              json.put("behaviorTokens", userActions.getBehaviortokens)
+              json.put("videoId", "00001")
+              json.put("authorId", "9999")
+              json.put("cate1Id", "66")
+              json.put("cateId","22")
+
+              //发送到kafka指定的topic
+              kafkaProducer.value.send("modelFeatures", json.toJSONString)
+
+            })
+
+          table1.close()
+          table2.close()
+          conn.close()
         })
-        table1.close()
-        table2.close()
-        table3.close()
-        conn.close()
 
-      })
+
     })
-
-
     ssc.start()
     ssc.awaitTermination()
     ssc.stop(false, true)
   }
 
-  //从HBASE 读出用户行为汇总数据
-  def hbase2UserActions(map: mutable.HashMap[String, String]): UserActionsSummay = {
-    val jsonStr: String = map.getOrElse("info","0")
-    val result: UserActionsSummay = JSON.parseObject(jsonStr,
-      classOf[UserActionsSummay])
-    result
-  }
-
-  //从HBASE读出视频指标汇总信息
-  def hbase2VideoSummay(map: mutable.HashMap[String, String]):VideoIndexSummay={
-    val jsonStr: String = map.getOrElse("info","0")
-    val result: VideoIndexSummay = JSON.parseObject(jsonStr,classOf[VideoIndexSummay])
-    result
-  }
-
-  /**
-    * 返回指定长度的Array[String]
-    * @param arr
-    * @param lenth 期待的新数组的长度
-    * @param expectStr 长度不足时期待插入的元素
-    * @return
-    */
-  def mkArrayString(arr:Array[String],lenth:Int,expectStr:String)
-  :Array[String]={
-    if(arr.length == 0 && arr.length >= lenth) {
-      arr
-    }else{
-      var newArr = new Array[String](lenth)
-      newArr ++= arr
-      for(i <- 0 to lenth - arr.length -1 ){
-        newArr :+ expectStr
-      }
-      newArr
-    }
-  }
-
-  /**
-    * 返回指定长度的Array[Double]
-    * @param arr
-    * @param lenth 期待的新数组的长度
-    * @param expectStr 长度不足时期待插入的元素
-    * @return
-    */
-  def mkArrayDouble(arr:Array[String],lenth:Int,expectStr:String)
-  :Array[Double]={
-    var newArr = new Array[Double](lenth)
-    if(arr.length == 0 && arr.length >= lenth) {
-      for(ele <- arr){
-        newArr :+ ele.toDouble
-      }
-    }else{
-
-      for(ele <- arr){
-        newArr :+ ele.toDouble
-      }
-
-      for(i <- 0 to lenth - arr.length -1 ){
-        newArr :+ expectStr.toDouble
-      }
-    }
-    newArr
-  }
 
   //获取sparkSession 的单例类
   object SparkSessionSingleton {
@@ -309,5 +335,4 @@ object StreamingTestV2 {
 
   //用户id和视频id 样例类
   case class UserVideo(user_id_1: String, video_id_1: String, is_click: Int) {}
-
 }

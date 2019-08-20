@@ -18,14 +18,12 @@ object DwsInsertDataDay {
     //允许笛卡尔积
     spark.conf.set("spark.sql.crossJoin.enabled", "true")
 
-    import spark.implicits._
     import spark.sql
 //    sql("show databases").show()
     sql("use headline_test")
 
     val month = "2019-08"
-    val day = "2019-08-14"
-
+    val day = "2019-08-15"
 
     val spe = "$."
 

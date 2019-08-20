@@ -27,7 +27,8 @@ public class Main {
         //kafka 配置
         Properties props = new Properties();
         //Kafka 服务器的主机名和端口号
-        props.put("bootstrap.servers", "psy831:9092,psy832:9092,psy833:9092");
+//        props.put("bootstrap.servers", "psy831:9092,psy832:9092,psy833:9092");
+        props.put("bootstrap.servers", "dev-node01:9092,dev-node02:9092,dev-node03:9092");
         // 等待所有副本节点的应答
         props.put("acks", "all");
         // 重试最大次数
@@ -127,7 +128,7 @@ public class Main {
             producer.send(new ProducerRecord<String, String>("dgmall_log",
                     i + "", commonFields.toJSONString()));*/
             try {
-                Thread.sleep(100);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

@@ -1,8 +1,8 @@
-package com.dgmall.sparktest.dgmallTestV2.common
+package common
 
+import bean._
+import caseclass._
 import com.alibaba.fastjson.{JSON, JSONObject}
-import com.dgmall.sparktest.dgmallTestV2.bean._
-import com.dgmall.sparktest.dgmallTestV2.caseclass.{ClickTable, CommenRecord, ViewTable, WatchTable}
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.spark.streaming.dstream.{DStream, InputDStream}
 

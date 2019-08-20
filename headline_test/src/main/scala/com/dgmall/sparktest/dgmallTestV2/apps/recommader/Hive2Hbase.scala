@@ -1,15 +1,12 @@
 package com.dgmall.sparktest.dgmallTestV2.apps.recommader
 
 import com.dgmall.sparktest.dgmallTestV2.bean.Constants
-import com.dgmall.sparktest.dgmallTestV2.common.ConfigureContext
-import org.apache.hadoop.hbase.{HBaseConfiguration, HColumnDescriptor, HTableDescriptor, TableName}
-import org.apache.hadoop.hbase.client.{ConnectionFactory, Get, HBaseAdmin, Put, Result}
+import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.util.Bytes
-import org.apache.spark.SparkConf
+import org.apache.hadoop.hbase.{HBaseConfiguration, HColumnDescriptor, HTableDescriptor, TableName}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 import scala.collection.mutable.ListBuffer
-import scala.util.control._
 
 /**
   * 将hive中的指定表数据导入到hbase中
@@ -24,12 +21,11 @@ object Hive2Hbase {
 
 
     val spark: SparkSession = SparkSession.builder()
-      .appName("Hive2HbaseTest")
-      .master("local[4]")
+      .appName("Hive2Hbase")
+      .master("local[*]")
       .enableHiveSupport()
       .getOrCreate()
-    System.setProperty("HADOOP_USER_NAME", "psy831")
-//    System.setProperty("HADOOP_USER_NAME", "dev")
+    System.setProperty("HADOOP_USER_NAME", "dev")
 
     // hbase表
     val hiveTable = "headline:app_user_actions_summary"
@@ -106,10 +102,14 @@ object Hive2Hbase {
     */
   def getHBaseConnection() = {
     val conf = HBaseConfiguration.create
-    conf.set("hbase.zookeeper.property.clientPort", Constants.ZOOKEEPER_CLIENT_PORT)
+    /*conf.set("hbase.zookeeper.property.clientPort", Constants.ZOOKEEPER_CLIENT_PORT)
     conf.set("hbase.zookeeper.quorum", Constants.ZOOKEEPER_QUORUM)
     conf.set("hbase.master", Constants.HBASE_MASTER)
-    conf.set("zookeeper.znode.parent", Constants.ZOOKEEPER_ZNODE_PARENT)
+    conf.set("zookeeper.znode.parent", Constants.ZOOKEEPER_ZNODE_PARENT)*/
+    conf.set("hbase.zookeeper.property.clientPort", "2181")
+    conf.set("hbase.zookeeper.quorum", "192.168.11.165")
+    conf.set("hbase.master", "192.168.11.164")
+    conf.set("zookeeper.znode.parent", "/hbase")
     ConnectionFactory.createConnection(conf)
   }
 
@@ -168,7 +168,6 @@ object Hive2Hbase {
     //hbase新建表或者添加列族
     createTable(hiveTableName,columnFamily)
 
-    import spark.implicits._
     import spark.sql
     //查询hive 数据
     sql("use headline_test")
