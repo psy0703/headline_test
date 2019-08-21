@@ -233,9 +233,23 @@
         </dependency>-->
 
         <dependency>
-            <groupId>org.tensorflow</groupId>
-            <artifactId>spark-tensorflow-connector_2.11</artifactId>
-            <version>1.14.0</version>
+            <groupId>com.googlecode.protobuf-java-format</groupId>
+            <artifactId>protobuf-java-format</artifactId>
+            <version>1.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java-util</artifactId>
+            <version>3.7.1</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.8</version>
+            <scope>provided</scope>
         </dependency>
 
     </dependencies>

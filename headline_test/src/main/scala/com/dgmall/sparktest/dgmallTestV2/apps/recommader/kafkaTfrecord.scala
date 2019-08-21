@@ -31,11 +31,12 @@ object kafkaTfrecord {
     initRedisPool()
 
     val conf = new SparkConf()
-      .setAppName("Kafka2KafkaStreaming")
+      .setAppName("kafkaTfrecord")
       .set("spark.streaming.kafka.consumer.cache.enabled", "false")
       .set("spark.debug.maxToStringFields", "100")
       .setIfMissing("spark.master", "local[*]")
       .set("spark.streaming.kafka.maxRatePerPartition", "20000")
+      .set("spark.jars", "E:\\MyCode\\headline_test\\src\\main\\resources\\spark-tensorflow-connector_2.11-1.10.0.jar")
 
     val sc = new SparkContext(conf)
     sc.setLogLevel("WARN")
@@ -45,7 +46,8 @@ object kafkaTfrecord {
     val ssc = new StreamingContext(sc, Seconds(10))
     ssc.checkpoint("hdfs://dev-node02:9000/spark/checkpoint/kafkaTfrecord")
 
-    val path  = "D:dgmall\\test\\test-output.tfrecord"
+//    val path  = "D:\\dgmall\\test\\test-output.tfrecord"
+    val path  = "hdfs://dev-node02:9000/spark/test-output-tfrecord/output.tfrecords"
 
     //kafka参数
     val bootstrapServers = "dev-node01:9092,dev-node02:9092,dev-node03:9092"
@@ -136,8 +138,9 @@ object kafkaTfrecord {
         )
       })
       val df: DataFrame = modelRDD.toDF()
-      df.write.format("tfrecords").mode("overwrite").option("recordType", "Example").save(path)
 
+      println("正在写入...")
+      df.write.format("tfrecords").mode("overwrite").option("recordType", "Example").save(path)
     })
 
 
@@ -193,7 +196,11 @@ object kafkaTfrecord {
       }
     } else {
       for (ele <- arr) {
-        newArr +: ele
+        if (ele.isEmpty){
+          newArr :+ ele.toLong
+        }else{
+          newArr:+ 0
+        }
       }
 
       for (i <- 0 to lenth - arr.length - 1) {
@@ -221,7 +228,11 @@ object kafkaTfrecord {
     } else {
 
       for (ele <- arr) {
-        newArr :+ ele.toDouble
+        if (ele.isEmpty){
+          newArr :+ ele.toDouble
+        }else{
+         newArr:+ 0
+        }
       }
 
       for (i <- 0 to lenth - arr.length - 1) {

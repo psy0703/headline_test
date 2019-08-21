@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="spark-tensorflow-connector_2.11-1.10.0">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/ecosystem/spark/spark-tensorflow-connector/target/spark-tensorflow-connector_2.11-1.10.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

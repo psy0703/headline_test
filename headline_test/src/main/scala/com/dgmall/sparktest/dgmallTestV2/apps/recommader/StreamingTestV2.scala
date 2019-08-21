@@ -114,7 +114,7 @@ object StreamingTestV2 {
       import spark.sql
 
       //过滤出view曝光日志
-      val viewDF: DataFrame = x.filter(y => if (y.Event.contains("view")) true else false)
+      val viewDF: DataFrame = x.filter(y => if ("view".equals(y.Type)) true else false)
         .map(x => {
           val properties: String = x.Properties.toString
           val view: AppView = JSON.parseObject(properties, classOf[AppView])
@@ -127,7 +127,7 @@ object StreamingTestV2 {
       viewDF.createOrReplaceTempView("tb_view")
 
       //过滤出click点击日志
-      val clickDF: DataFrame = x.filter(y => if (y.Event.contains("click")) true else false)
+      val clickDF: DataFrame = x.filter(y => if ("click".equals(y.Type)) true else false)
         .map(x => {
           val properties: String = x.Properties.toString
           val click: AppClick = JSON.parseObject(properties, classOf[AppClick])

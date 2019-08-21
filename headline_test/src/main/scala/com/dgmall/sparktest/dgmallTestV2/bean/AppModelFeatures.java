@@ -1,9 +1,12 @@
 package com.dgmall.sparktest.dgmallTestV2.bean;
 
+
 /**
  * @Author: Cedaris
  * @Date: 2019/8/20 18:09
  */
+
+
 public class AppModelFeatures {
     private String audience_id;
     private String item_id;
@@ -56,6 +59,8 @@ public class AppModelFeatures {
     private String authorId;
     private String cate1Id;
     private String cateId;
+
+
 
     public String getAudience_id() {
         return audience_id;
