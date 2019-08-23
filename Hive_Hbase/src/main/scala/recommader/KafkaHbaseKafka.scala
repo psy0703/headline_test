@@ -1,8 +1,8 @@
-package com.dgmall.sparktest.dgmallTestV2.apps.recommader
+package recommader
 
 import java.lang
-import com.dgmall.sparktest.dgmallTestV2.common.CommonUtils._
-import com.dgmall.sparktest.dgmallTestV2.common.HBaseUtils._
+import common.CommonUtils._
+import common.HBaseUtils._
 import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client.HBaseAdmin
 import org.apache.kafka.clients.consumer.ConsumerRecord

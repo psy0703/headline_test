@@ -2,7 +2,6 @@ package common
 
 import java.util
 
-import bean.Constants
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.util.Bytes
@@ -32,15 +31,15 @@ object HBaseUtils extends Serializable {
 
   def getHBaseConnection() = {
     val conf = HBaseConfiguration.create
-    conf.set("hbase.zookeeper.property.clientPort", Constants.ZOOKEEPER_CLIENT_PORT)
+    /*conf.set("hbase.zookeeper.property.clientPort", Constants.ZOOKEEPER_CLIENT_PORT)
     conf.set("hbase.zookeeper.quorum", Constants.ZOOKEEPER_QUORUM)
     conf.set("hbase.master", Constants.HBASE_MASTER)
-    conf.set("zookeeper.znode.parent", Constants.ZOOKEEPER_ZNODE_PARENT)
-/*
+    conf.set("zookeeper.znode.parent", Constants.ZOOKEEPER_ZNODE_PARENT)*/
+
     conf.set("hbase.zookeeper.property.clientPort", "2181")
     conf.set("hbase.zookeeper.quorum", "192.168.11.165")
     conf.set("hbase.master", "192.168.11.164")
-    conf.set("zookeeper.znode.parent", "/hbase")*/
+    conf.set("zookeeper.znode.parent", "/hbase")
     ConnectionFactory.createConnection(conf)
   }
 
@@ -275,20 +274,21 @@ object HBaseUtils extends Serializable {
     * @param tablename
     * @param rowkey
     * @param famliyname
-    * @param colum
+    * @param column
     * @return
     */
   def getDataByRowkeyCfColumn(admin: Admin,
                               tablename: String,
                               rowkey: String,
                               famliyname: String,
-                              colum: String): String = {
+                              column: String): String = {
     val table: Table = admin.getConnection.getTable(TableName.valueOf(tablename))
     // 将字符串转换成byte[]
     val rowkeybyte: Array[Byte] = Bytes.toBytes(rowkey)
     val get = new Get(rowkeybyte)
+    get.addFamily(famliyname.getBytes())
     val result: Result = table.get(get)
-    val resultbytes = result.getValue(famliyname.getBytes, colum.getBytes)
+    val resultbytes = result.getValue(famliyname.getBytes, column.getBytes)
     if (resultbytes == null) {return null}
     new String(resultbytes)
   }

@@ -1,4 +1,4 @@
-package com.dgmall.sparktest.dgmallTestV2.bean;
+package bean;
 
 
 /**

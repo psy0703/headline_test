@@ -92,6 +92,7 @@ object StreamingTestV2 {
     //需要读取的hbase 的表
     val hiveTableName1 = "headlineV2:app_user_actions_info_summary"
     val hiveTableName2 = "headlineV2:app_video_index_info_summary"
+    val hiveTableName3 = "headlineV2:app_video_info_summary"
     //列族
     val cf1 = "user_actions"
     val cf2 = "video_index"
@@ -211,7 +212,7 @@ object StreamingTestV2 {
 
               //从HBASE获取视频信息
               var video_info: String =
-                getDataByRowkeyCfColumn(admin, hiveTableName2, row.video_id_1, cf4, columnName)
+                getDataByRowkeyCfColumn(admin, hiveTableName3, row.video_id_1, cf4, columnName)
 
               //todo 调试专用 hbase中读取到数据为null时 ，采用默认数据
               if (user_actions == null) {

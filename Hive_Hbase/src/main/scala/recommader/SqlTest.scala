@@ -1,4 +1,4 @@
-package com.dgmall.sparktest.dgmallTestV2.apps.recommader
+package recommader
 
 import org.apache.spark.sql.SparkSession
 

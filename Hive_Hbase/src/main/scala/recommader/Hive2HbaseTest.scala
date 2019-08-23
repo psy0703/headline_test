@@ -1,7 +1,7 @@
-package com.dgmall.sparktest.dgmallTestV2.apps.recommader
+package recommader
 
 import com.alibaba.fastjson.JSONObject
-import com.dgmall.sparktest.dgmallTestV2.common.HBaseUtils._
+import common.HBaseUtils._
 import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client.{Get, HBaseAdmin, Put, Result}
 import org.apache.hadoop.hbase.util.Bytes

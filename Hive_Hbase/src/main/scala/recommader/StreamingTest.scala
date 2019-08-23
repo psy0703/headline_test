@@ -1,11 +1,10 @@
-package com.dgmall.sparktest.dgmallTestV2.apps.recommader
+package recommader
 
 import java.lang
 
 import com.alibaba.fastjson.JSON
-import com.dgmall.sparktest.dgmallTestV2.apps.recommader.Hive2Hbase.getHBaseConnection
-import com.dgmall.sparktest.dgmallTestV2.bean.{AppClick, AppView, Constants}
-import com.dgmall.sparktest.dgmallTestV2.caseclass.{ClickTable, CommenRecord, UserActionsSummay, VideoIndexSummay, ViewTable}
+import bean.{AppClick, AppView, Constants}
+import caseclass.{ClickTable, CommenRecord, UserActionsSummay, VideoIndexSummay, ViewTable}
 import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client.HBaseAdmin
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -16,7 +15,7 @@ import org.apache.spark.streaming.dstream.{DStream, InputDStream}
 import org.apache.spark.streaming.kafka010.ConsumerStrategies.Subscribe
 import org.apache.spark.streaming.kafka010.KafkaUtils
 import org.apache.spark.streaming.kafka010.LocationStrategies.PreferConsistent
-import com.dgmall.sparktest.dgmallTestV2.common.HBaseUtils._
+import common.HBaseUtils._
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer

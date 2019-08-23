@@ -1,33 +1,34 @@
-package com.dgmall.sparktest.dgmallTestV2.apps.recommader
+package recommader
 
-import com.alibaba.fastjson.JSONObject
-import com.dgmall.sparktest.dgmallTestV2.common.HBaseUtils._
-import org.apache.hadoop.hbase.TableName
-import org.apache.hadoop.hbase.client.{Get, HBaseAdmin, Put, Result}
+import bean.Constants
+import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.util.Bytes
+import org.apache.hadoop.hbase.{HBaseConfiguration, HColumnDescriptor, HTableDescriptor, TableName}
 import org.apache.spark.sql.{DataFrame, SparkSession}
+
 import scala.collection.mutable.ListBuffer
 
 /**
-  * 存入HBASE 的value格式变为json
+  * 将hive中的指定表数据导入到hbase中
   * @Author: Cedaris
-  * @Date: 2019/8/14 13:47
+  * @Date: 2019/8/14 16:17
   */
-object Hive2HbaseTest {
+object Hive2Hbase {
   def main(args: Array[String]): Unit = {
 
+    //todo 将创建表给为添加列族 alter 'tablename', 'columnfamily2'
+
+
+
     val spark: SparkSession = SparkSession.builder()
-      .appName("Hive2HbaseTest2")
+      .appName("Hive2Hbase")
       .master("local[*]")
       .enableHiveSupport()
       .getOrCreate()
-
     System.setProperty("HADOOP_USER_NAME", "dev")
 
-
-
-/*    // 用户行为汇总表
-    val hiveTable = "headlineV2:app_user_actions_info_summary"
+    // hbase表
+    val hiveTable = "headline:app_user_actions_summary"
     //Hive 表中的列
     //app_user_actions_summary
     var columnList = new ListBuffer[String]
@@ -35,6 +36,7 @@ object Hive2HbaseTest {
       "timesincelastwatchsqrt", "timesincelastwatchsquare", "behaviorvids",
       "behavioraids", "behaviorcids", "behaviorc1ids", "behaviortokens",
       "cate1_prefer", "weights_cate1_prefer", "cate2_prefer", "weights_cate2_prefer")
+
     // 写入数据到hbase
     val sqlQurry =
       """
@@ -42,15 +44,12 @@ object Hive2HbaseTest {
         |from headline_test.app_user_actions_summary
       """.stripMargin
 
-    val cf1 = "user_actions"
+    val cf1 = Constants.HBASE_COLUMN_FAMILY
     loadHive2Hbase(spark,hiveTable,columnList,sqlQurry,cf1)
 
-    println("成功将HIVE 中的app_user_actions_summary 导入 HBASE中")
+  println("成功将HIVE 中的app_user_actions_summary 导入 HBASE中")
 
-
-
-    //视频指标汇总
-    val table2 = "headlineV2:app_video_index_info_summary"
+    val table2 = "headline:app_video_summary"
     var columnList2 = new ListBuffer[String]
     //app_video_summary
     columnList2.append("video_id",
@@ -62,19 +61,17 @@ object Hive2HbaseTest {
     val day = "2019-08-14"
     val sqlQurry2 =
       s"""
-         |select *
-         |from headline_test.app_video_summary
-         |where day = '${day}'
+        |select *
+        |from headline_test.app_video_summary
+        |where day = '${day}'
       """.stripMargin
-    val cf2 = "video_index"
+    val cf2 = day
 
     loadHive2Hbase(spark,table2,columnList2,sqlQurry2,cf2)
 
     println("成功将HIVE 中的app_video_summary导入到HBASE 中")
 
-
-//  用户等级汇总(todo:有用户信息表后加入用户信息)
-    val table3 = "headlineV2:app_user_actions_info_summary"
+    val table3 = "headline:user_level"
     val sqlQurry3 =
       """
         |select
@@ -87,47 +84,63 @@ object Hive2HbaseTest {
         |      frequence_type
         |from headline_test.temp_user_level
       """.stripMargin
-    var columnList3 = new ListBuffer[String]
-    columnList3.append("user_id","sum_play_long","sum_play_times",
-      "play_long_rank","play_times_rank","value_type","frequence_type")
-    val cf3 = "User_Info"
+    var userLevelList = new ListBuffer[String]
+    userLevelList.append("user_id","sum_play_long","sum_play_times",
+    "play_long_rank","play_times_rank","value_type","frequence_type")
+    val cf3 = "User_Level"
 
-    loadHive2Hbase(spark,table3,columnList3,sqlQurry3,cf3)
+    loadHive2Hbase(spark,table3,userLevelList,sqlQurry3,cf3)
 
-    println("成功将HIVE 中的user_info导入到HBASE 中")*/
-
-
-    //视频信息
-    val table4 = "headlineV2:app_video_info_summary"
-    var columnList4 = new ListBuffer[String]
-    //dwd_headline_video_info
-    columnList4.append("user_id","video_id","upload_time","video_desc", "video_tag",
-      "video_child_tag","video_long","music_name",
-      "music_write","video_topic","video_address"
-    )
-    val sqlQurry4 =
-      s"""
-         |select *
-         |from headline_test.dwd_headline_video_info
-      """.stripMargin
-    val cf4 = "video_info"
-
-    loadHive2Hbase(spark,table4,columnList4,sqlQurry4,cf4)
-
-    println("成功将HIVE 中的video_info导入到HBASE 中")
-
+    println("成功将HIVE 中的user_level导入到HBASE 中")
 
     spark.close()
   }
 
   /**
-    * hbase获取指定列数据
-    * @param tablename
-    * @param rowkey
-    * @param famliyname
-    * @param colum
+    * 获取HBASE 连接
     * @return
     */
+  def getHBaseConnection() = {
+    val conf = HBaseConfiguration.create
+    /*conf.set("hbase.zookeeper.property.clientPort", Constants.ZOOKEEPER_CLIENT_PORT)
+    conf.set("hbase.zookeeper.quorum", Constants.ZOOKEEPER_QUORUM)
+    conf.set("hbase.master", Constants.HBASE_MASTER)
+    conf.set("zookeeper.znode.parent", Constants.ZOOKEEPER_ZNODE_PARENT)*/
+    conf.set("hbase.zookeeper.property.clientPort", "2181")
+    conf.set("hbase.zookeeper.quorum", "192.168.11.165")
+    conf.set("hbase.master", "192.168.11.164")
+    conf.set("zookeeper.znode.parent", "/hbase")
+    ConnectionFactory.createConnection(conf)
+  }
+
+  /**
+    * HBASE中表不存在就创建表
+    * @param hiveTable
+    * @param columnFamily
+    */
+  def createTable(hiveTable: String,columnFamily:String): Unit = {
+    val conn = getHBaseConnection()
+    val admin = conn.getAdmin.asInstanceOf[HBaseAdmin]
+    val tableName = TableName.valueOf(hiveTable)
+    if (!admin.tableExists(tableName)) {
+      // 表不存在则创建
+      val desc = new HTableDescriptor(tableName)
+      val columnDesc = new HColumnDescriptor(columnFamily)
+      desc.addFamily(columnDesc)
+      admin.createTable(desc)
+    }else{
+      val tableDesc: HTableDescriptor = admin.getTableDescriptor(tableName)
+      admin.disableTable(tableName)
+      //若列族已存在，先删除
+      tableDesc.removeFamily(Bytes.toBytes(columnFamily))
+      //创建新的列族
+      val columnDescriptor = new HColumnDescriptor(columnFamily)
+      tableDesc.addFamily(columnDescriptor)
+      admin.modifyTable(tableName,tableDesc)
+      admin.enableTable(tableName)
+    }
+  }
+
   def getData(tablename: String, rowkey: String, famliyname: String,
               colum: String): String = {
     val conn = getHBaseConnection()
@@ -150,48 +163,40 @@ object Hive2HbaseTest {
     */
   def loadHive2Hbase(spark: SparkSession,hiveTableName:String,
                      columnList:ListBuffer[String],sqlQurry:String,
-                     columnFamily:String): Unit ={
-
+                     columnFamily:String)
+  : Unit ={
     //hbase新建表或者添加列族
     createTable(hiveTableName,columnFamily)
 
     import spark.sql
-
+    //查询hive 数据
     sql("use headline_test")
     val sqlDF: DataFrame = sql(sqlQurry)
+    sqlDF.show(10)
 
     // 写入数据到hbase
     sqlDF.foreachPartition(x => {
-      //获取配置和表
       val conn = getHBaseConnection()
       val admin = conn.getAdmin.asInstanceOf[HBaseAdmin]
       val tableName = TableName.valueOf(hiveTableName)
       val table = conn.getTable(tableName)
 
       x.foreach(row => {
-        //校验
         def checkValue(v: Any): String = if (v == null || v.toString.trim.eq("")) "null" else v.toString
 
         val rowkey = row.getString(0).getBytes()
         val cf = columnFamily.getBytes()
         val put = new Put(rowkey)
 
-        //创建json对象
-        val json = new JSONObject()
         for (i <- 0 until columnList.size) {
-          //将K-V 加入json
-          json.put(columnList(i),checkValue(row(i)))
+          put.addColumn(cf,
+            columnList(i).getBytes(),
+            checkValue(row(i)).getBytes())
         }
-        //将json包装的数据写入hbase
-        put.addColumn(cf,
-          "info".getBytes(),
-          json.toString().getBytes())
         table.put(put)
       })
-      //关闭连接
       table.close()
       conn.close()
     })
   }
-
 }

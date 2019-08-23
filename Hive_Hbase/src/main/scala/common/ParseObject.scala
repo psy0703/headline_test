@@ -1,10 +1,10 @@
 package common
 
-import bean._
 import caseclass._
 import com.alibaba.fastjson.{JSON, JSONObject}
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.spark.streaming.dstream.{DStream, InputDStream}
+import bean._
 
 /**
   * @Author: Cedaris

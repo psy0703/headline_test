@@ -1,9 +1,9 @@
-package com.dgmall.sparktest.dgmallTestV2.apps.realtime
+package realtime
 
 import java.lang
 import java.util.Date
 import com.alibaba.fastjson.JSON
-import com.dgmall.sparktest.dgmallTestV2.caseclass.CommenRecord
+import caseclass.CommenRecord
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession

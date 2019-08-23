@@ -1,144 +1,82 @@
-package com.dgmall.log.client;
+package com.dgmall.log.utils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.dgmall.log.utils.CommonUtils;
 import com.dgmall.log.bean.*;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Properties;
 import java.util.Random;
 import java.util.UUID;
 
 /**
  * @Author: Cedaris
- * @Date: 2019/7/17 13:39
+ * @Date: 2019/8/1 10:38
  */
-public class Main {
-    private final static Logger logger = LoggerFactory.getLogger(Main.class);
+public class CommonUtils {
 
-    public static void main(String[] args) {
-        //kafka 配置
-        Properties props = new Properties();
-        //Kafka 服务器的主机名和端口号
-//        props.put("bootstrap.servers", "psy831:9092,psy832:9092,psy833:9092");
-        props.put("bootstrap.servers", "dev-node01:9092,dev-node02:9092,dev-node03:9092");
-        // 等待所有副本节点的应答
-        props.put("acks", "all");
-        // 重试最大次数
-        props.put("retries", 0);
-        // 批消息处理大小
-        props.put("batch.size", 16384);
-        // 请求延时
-        props.put("linger.ms", 1);
-        // 发送缓存区内存大小
-        props.put("buffer.memory", 33554432);
-        // key序列化
-        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        // value序列化
-        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+    public static Random rand = new Random();
 
-        KafkaProducer<String, String> producer = new KafkaProducer<String, String>(props);
+    /**
+     * 返回随机城市名
+     * @return
+     */
+    public static String getRandomCity(){
+        ArrayList<String>  citys= new ArrayList<>();
+        citys.add("深圳");
+        citys.add("北京");
+        citys.add("上海");
+        citys.add("广州");
+        citys.add("长沙");
+        citys.add("重庆");
+        citys.add("厦门");
+        citys.add("武汉");
+        citys.add("杭州");
+        citys.add("成都");
 
-        for (int i = 0; i < 10000000; i++) {
-            JSONObject commonFields = generaCommonFields();
-
-            int flag = rand.nextInt(4);
-            switch (flag) {
-                case (0): //生成曝光日志
-                    String userId = getRandomDigits(5).toString();
-                    String videoId = getRandomDigits(5).toString();
-                    String traceId =
-                            "app" + rand.nextInt(3) + ".scenes" + rand.nextInt(10) + ".plan" + rand.nextInt(3) +
-                                    ".bucket" + rand.nextInt(4);
-
-                    commonFields.put("Type", "view");
-                    commonFields.put("Event", "view");
-                    commonFields.put("Properties", generaView(userId, videoId, traceId));
-
-                    SendMessage(logger,producer,commonFields,i);
-
-
-                    //生成曝光日志的情况下才随机生成 点击 、观看 、 送礼日志
-
-                    if ( rand.nextInt(2) == 1) {
-                        JSONObject commonFields2 = commonFields;
-                        commonFields2.put("Type", "click");
-                        commonFields2.put("Event", "click");
-                        commonFields2.put("Properties", generaClick(userId, videoId, traceId));
-                        SendMessage(logger,producer,commonFields2,++i);
-
-
-                        if (rand.nextInt(2) == 1) {
-                            JSONObject commonFields3 = commonFields;
-                            commonFields3.put("Type", "watch_video");
-                            commonFields3.put("Event", "play");
-                            commonFields3.put("Properties", generaWatch(userId, videoId, traceId));
-                            SendMessage(logger,producer,commonFields3,++i);
-                        }
-
-                        if (rand.nextInt(2) == 1) {
-                            JSONObject commonFields4 = commonFields;
-                            commonFields4.put("Type", "gift");
-                            commonFields4.put("Event", "gift");
-                            commonFields4.put("Properties", generaGift(userId, videoId, traceId));
-                            SendMessage(logger,producer,commonFields4,++i);
-                        }
-
-                    }
-                    break;
-
-                case (1):
-                    commonFields.put("Type", "behavior");
-                    commonFields.put("Event", "behavior");
-                    commonFields.put("Properties", generaBehavior());
-                    SendMessage(logger,producer,commonFields,i);
-                    break;
-
-                case (2):
-                    commonFields.put("Type", "search_click");
-                    commonFields.put("Event", "search_click");
-                    commonFields.put("Properties", generaSearch());
-                    SendMessage(logger,producer,commonFields,i);
-                    break;
-
-                case (3):
-                    commonFields.put("Type", "release");
-                    commonFields.put("Event", "release");
-                    commonFields.put("Properties", generaRelease());
-                    SendMessage(logger,producer,commonFields,i);
-                    break;
-
-            }
-
-/*//          时间
-            long millis = System.currentTimeMillis();
-
-//          控制台打印
-            logger.info(millis + "|" + commonFields.toJSONString());
-
-
-            //kafka 生产者 发送消息
-            producer.send(new ProducerRecord<String, String>("dgmall_log",
-                    i + "", commonFields.toJSONString()));*/
-            try {
-                Thread.sleep(300);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-        }
+        Random random = new Random();
+        int index = random.nextInt(10);
+        String city = citys.get(index);
+        return city;
     }
 
-    static Random rand = new Random();
+    /**
+     * 返回指定范围的视频标签编码
+     * @return
+     */
+    public static int getRandomLabel() {
+        int max=80;
+        int min=18;
+        Random random = new Random();
 
-    static void SendMessage(Logger logger, KafkaProducer<String, String> producer, JSONObject commonFields,int i) {
+        int s = random.nextInt(max)%(max-min+1) + min;
+       return s;
+    }
+
+    /**
+     * 返回指定范围的二级视频标签编码
+     * @return
+     */
+    public static int getRandomClass2Label() {
+        int max=180;
+        int min=81;
+        Random random = new Random();
+
+        int s = random.nextInt(max)%(max-min+1) + min;
+        return s;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(CommonUtils.getRandomCity());
+
+    }
+
+    public static void SendMessage(Logger logger, KafkaProducer<String, String> producer, JSONObject commonFields, int i) {
         //时间
         long millis = System.currentTimeMillis();
 
@@ -157,7 +95,7 @@ public class Main {
      * @param jsonObject
      * @return
      */
-    static JSONObject packEventJson(String eventName, String type, JSONObject jsonObject) {
+    public static JSONObject packEventJson(String eventName, String type, JSONObject jsonObject) {
 
         JSONObject eventJson = new JSONObject();
 
@@ -173,7 +111,7 @@ public class Main {
      *
      * @return
      */
-    static JSONObject generaCommonFields() {
+    public static JSONObject generaCommonFields() {
         AppBaseField baseField = new AppBaseField();
         String format = "yyyy-MM-dd HH:mm:ss";
         SimpleDateFormat sdf = new SimpleDateFormat(format);
@@ -201,7 +139,7 @@ public class Main {
      *
      * @return
      */
-    static JSONObject generaWatch() {
+    public static JSONObject generaWatch() {
         AppWatch appWatch = new AppWatch();
         appWatch.setTrace_id("app" + rand.nextInt(3) + ".scenes" + rand.nextInt(10) + ".plan" + rand.nextInt(3) +
                 ".bucket" + rand.nextInt(4));
@@ -256,7 +194,7 @@ public class Main {
      * @param videoId
      * @return
      */
-    static JSONObject generaWatch(String userId, String videoId, String trace_id) {
+    public static JSONObject generaWatch(String userId, String videoId, String trace_id) {
         AppWatch appWatch = new AppWatch();
         appWatch.setTrace_id(trace_id);
         appWatch.setOrder(Integer.toString(rand.nextInt(11)));
@@ -308,7 +246,7 @@ public class Main {
      *
      * @return
      */
-    static JSONObject generaView() {
+    public static JSONObject generaView() {
         AppView appView = new AppView();
         appView.setTrace_id("app" + rand.nextInt(3) + ".scenes" + rand.nextInt(10) + ".plan" + rand.nextInt(3) +
                 ".bucket" + rand.nextInt(4));
@@ -325,7 +263,7 @@ public class Main {
      * @param videoId
      * @return
      */
-    static JSONObject generaView(String userId, String videoId, String trace_id) {
+    public static JSONObject generaView(String userId, String videoId, String trace_id) {
         AppView appView = new AppView();
         appView.setTrace_id(trace_id);
         appView.setUser_id(userId);
@@ -339,7 +277,7 @@ public class Main {
      *
      * @return
      */
-    static JSONObject generaClick() {
+    public static JSONObject generaClick() {
         AppClick appClick = new AppClick();
         appClick.setTrace_id("app" + rand.nextInt(3) + ".scenes" + rand.nextInt(10) + ".plan" + rand.nextInt(3) +
                 ".bucket" + rand.nextInt(4));
@@ -358,7 +296,7 @@ public class Main {
      * @param videoId
      * @return
      */
-    static JSONObject generaClick(String userId, String videoId, String trace_id) {
+    public static JSONObject generaClick(String userId, String videoId, String trace_id) {
         AppClick appClick = new AppClick();
         appClick.setTrace_id(trace_id);
         appClick.setUser_id(userId);
@@ -373,7 +311,7 @@ public class Main {
      *
      * @return
      */
-    static JSONObject generaBehavior() {
+    public static JSONObject generaBehavior() {
         AppBehavior appBehavior = new AppBehavior();
         appBehavior.setTrace_id("app" + rand.nextInt(3) + ".scenes" + rand.nextInt(10) + ".plan" + rand.nextInt(3) +
                 ".bucket" + rand.nextInt(4));
@@ -390,7 +328,7 @@ public class Main {
      *
      * @return
      */
-    static JSONObject generaSearch() {
+    public static JSONObject generaSearch() {
         AppSearch appSearch = new AppSearch();
         appSearch.setSearch_content(getCONTENT(5));
         appSearch.setUser_id(getRandomDigits(5));
@@ -403,7 +341,7 @@ public class Main {
      *
      * @return
      */
-    static JSONObject generaGift() {
+    public static JSONObject generaGift() {
         AppGift appGift = new AppGift();
         appGift.setContent(getCONTENT(3) + "特产店");
         appGift.setUser_id(getRandomDigits(5));
@@ -424,7 +362,7 @@ public class Main {
      * @param videoId
      * @return
      */
-    static JSONObject generaGift(String userId, String videoId, String trace_id) {
+    public static JSONObject generaGift(String userId, String videoId, String trace_id) {
         AppGift appGift = new AppGift();
         appGift.setContent(getCONTENT(3) + "特产店");
         appGift.setUser_id(userId);
@@ -440,7 +378,7 @@ public class Main {
      *
      * @return
      */
-    static JSONObject generaRelease() {
+    public static JSONObject generaRelease() {
         AppReleaseVideo appReleaseVideo = new AppReleaseVideo();
         appReleaseVideo.setUser_id(getRandomDigits(5));
         appReleaseVideo.setVideo_id(getRandomDigits(5));
@@ -462,7 +400,7 @@ public class Main {
      * @param leng
      * @return
      */
-    static String getRandomDigits(int leng) {
+    public static String getRandomDigits(int leng) {
         String result = "";
         for (int i = 0; i < leng; i++) {
             result += rand.nextInt(10);
@@ -512,7 +450,7 @@ public class Main {
      *
      * @return
      */
-    private static char getRandomChar() {
+    public static char getRandomChar() {
         String str = "";
         int hightPos; //
         int lowPos;
@@ -540,11 +478,12 @@ public class Main {
      *
      * @return
      */
-    static public String getCONTENT(int len) {
+    public static  String getCONTENT(int len) {
         String str = "";
         for (int i = 0; i < len; i++) {
             str += getRandomChar();
         }
         return str;
     }
+
 }

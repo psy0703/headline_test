@@ -1,11 +1,10 @@
-package com.dgmall.sparktest.dgmallTestV2.apps.recommader
+package recommader
 
 import java.lang
-import com.dgmall.sparktest.dgmallTestV2.common.CommonUtils._
+import common.CommonUtils._
 import com.alibaba.fastjson.JSON
-import com.dgmall.sparktest.dgmallTestV2.apps.recommader.Kafka2KafkaStreaming.initRedisPool
-import com.dgmall.sparktest.dgmallTestV2.bean.AppModelFeatures
-import com.dgmall.sparktest.dgmallTestV2.caseclass.ModelFeatures
+import bean.AppModelFeatures
+import caseclass.ModelFeatures
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -27,8 +26,7 @@ object kafkaTfrecord {
   private val STOP_FLAG = "TEST_STOP_FLAG"
 
   def main(args: Array[String]): Unit = {
-    //初始化Redis Pool
-    initRedisPool()
+
 
     val conf = new SparkConf()
       .setAppName("kafkaTfrecord")
